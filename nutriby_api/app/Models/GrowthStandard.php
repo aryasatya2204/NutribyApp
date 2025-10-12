@@ -19,6 +19,7 @@ class GrowthStandard extends Model
     protected $fillable = [
         'gender',
         'age_in_months',
+        'reference_height_cm',
         'metric',
         'sd3_neg',
         'sd2_neg',

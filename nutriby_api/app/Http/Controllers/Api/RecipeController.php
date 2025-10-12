@@ -35,4 +35,40 @@ class RecipeController extends Controller
         // Kita hanya perlu me-load relasi ingredients-nya.
         return response()->json($recipe->load('ingredients'));
     }
+    
+    /**
+     * Search for recipes based on a query string.
+     * The search is performed on both the recipe title and its ingredients.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+     public function search(Request $request)
+    {
+        // 1. Validasi input: pastikan ada query pencarian 'q'
+        $request->validate([
+            'q' => 'required|string|min:3',
+        ]);
+
+        $query = $request->input('q');
+
+        // 2. Lakukan query pencarian gabungan
+        $recipes = Recipe::query()
+            // Kriteria 1: Cari resep yang judulnya (title) mengandung kata kunci
+            ->where('title', 'LIKE', "%{$query}%")
+            
+            // Kriteria 2: ATAU cari resep yang memiliki bahan (ingredients) dengan nama yang mengandung kata kunci
+            ->orWhereHas('ingredients', function ($ingredientQuery) use ($query) {
+                $ingredientQuery->where('name', 'LIKE', "%{$query}%");
+            })
+            
+            // Eager load bahan-bahannya untuk ditampilkan di hasil pencarian
+            ->with('ingredients')
+            
+            // Batasi hasil dan berikan paginasi
+            ->paginate(10);
+
+        // 3. Kembalikan hasil dalam format JSON
+        return response()->json($recipes);
+    }
 }

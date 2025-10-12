@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\RecipeController;   
 use App\Http\Controllers\Api\AllergyController;
+use App\Http\Controllers\Api\WeeklyPlanController;
 
 // Public routes for authentication
 Route::post('/register', [AuthController::class, 'register']);
@@ -26,8 +27,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/children/{child}', [ChildController::class, 'show']); // Mendapatkan detail satu anak
     Route::put('/children/{child}', [ChildController::class, 'update']); // Memperbarui data anak
 
+    Route::get('/recipes/search', [RecipeController::class, 'search']);
     Route::get('/recipes', [RecipeController::class, 'index']);
     Route::get('/recipes/{recipe}', [RecipeController::class, 'show']);
     Route::get('/allergies', [AllergyController::class, 'index']);
     Route::get('/allergies/{allergy}', [AllergyController::class, 'show']);
+
+    Route::post('/children/{child}/weekly-plan/generate', [WeeklyPlanController::class, 'generate']);
 });

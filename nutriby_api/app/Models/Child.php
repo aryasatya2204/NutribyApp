@@ -19,8 +19,11 @@ class Child extends Model
         'parent_monthly_income',
         'nutritional_status_wfa',
         'nutritional_status_hfa',
+        'nutritional_status_wfh',
         'nutritional_status_notes',
         'recommended_budget',
+        'budget_min', 
+        'budget_max', 
     ];
 
     /**

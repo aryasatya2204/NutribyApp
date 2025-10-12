@@ -109,11 +109,13 @@ class ChildController extends Controller
         $statusResult = $this->nutritionalStatusService->calculate($child);
         $child->nutritional_status_hfa = $statusResult['status_hfa'];
         $child->nutritional_status_wfa = $statusResult['status_wfa'];
+        $child->nutritional_status_wfh = $statusResult['status_wfh'];
         $child->nutritional_status_notes = $statusResult['notes'];
         
         // Step B: Recommend budget based on the new status
-        $recommendedBudget = $this->budgetRecommendationService->recommend($child);
-        $child->recommended_budget = $recommendedBudget;
+        $budgetRange = $this->budgetRecommendationService->recommend($child);
+        $child->budget_min = $budgetRange['min'];
+        $child->budget_max = $budgetRange['max']; 
 
         // Step C: Save all the processed data to the database
         $child->save();
@@ -124,7 +126,7 @@ class ChildController extends Controller
             'weight' => $child->current_weight,
             'height' => $child->current_height,
             'nutritional_status_hfa' => $child->nutritional_status_hfa,
-            'recommended_budget_at_the_time' => $child->recommended_budget,
+            'recommended_budget_at_the_time' => $child->budget_max,
         ]);
     }
 }
