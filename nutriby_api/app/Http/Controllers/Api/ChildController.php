@@ -6,8 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Child;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Services\NutritionalStatusService; 
-use App\Services\BudgetRecommendationService; 
+use App\Services\NutritionalStatusService;
+use App\Services\BudgetRecommendationService;
+use Illuminate\Support\Facades\DB;
 
 class ChildController extends Controller
 {
@@ -42,21 +43,45 @@ class ChildController extends Controller
             'current_weight' => 'required|numeric|min:1',
             'current_height' => 'required|numeric|min:20',
             'parent_monthly_income' => 'required|integer|min:0',
+
+            // Validasi untuk input alergi dan kesukaan
+            'allergy_ids' => 'sometimes|array',
+            'allergy_ids.*' => 'integer|exists:ingredients,id',
+            'favorite_ids' => 'sometimes|array',
+            'favorite_ids.*' => 'integer|exists:ingredients,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        // 1. Create the child record associated with the logged-in user.
-        $child = $request->user()->children()->create($validator->validated());
+        // Gunakan DB Transaction untuk memastikan semua data berhasil disimpan
+        $child = DB::transaction(function () use ($request) {
+            // 1. Buat data anak seperti biasa
+            $child = $request->user()->children()->create($request->except(['allergy_ids', 'favorite_ids']));
 
-        // 2. Run our intelligent engines.
+            // 2. Simpan relasi alergi jika ada
+            if ($request->has('allergy_ids')) {
+                $child->allergies()->attach($request->allergy_ids);
+            }
+
+            // 3. Simpan relasi makanan kesukaan jika ada
+            if ($request->has('favorite_ids')) {
+                $child->favoriteIngredients()->attach($request->favorite_ids);
+            }
+
+            return $child;
+        });
+
+        // 4. Jalankan engine cerdas kita setelah semuanya tersimpan
         $this->processChildData($child);
+
+        // Muat ulang relasi agar tampil di response
+        $child->load(['allergies', 'favoriteIngredients']);
 
         return response()->json($child, 201);
     }
-    
+
     /**
      * Display the specified child.
      */
@@ -98,7 +123,7 @@ class ChildController extends Controller
 
         return response()->json($child);
     }
-    
+
     /**
      * A private helper method to run our services and update the child model.
      * This avoids code duplication between store() and update().
@@ -111,11 +136,11 @@ class ChildController extends Controller
         $child->nutritional_status_wfa = $statusResult['status_wfa'];
         $child->nutritional_status_wfh = $statusResult['status_wfh'];
         $child->nutritional_status_notes = $statusResult['notes'];
-        
+
         // Step B: Recommend budget based on the new status
         $budgetRange = $this->budgetRecommendationService->recommend($child);
         $child->budget_min = $budgetRange['min'];
-        $child->budget_max = $budgetRange['max']; 
+        $child->budget_max = $budgetRange['max'];
 
         // Step C: Save all the processed data to the database
         $child->save();

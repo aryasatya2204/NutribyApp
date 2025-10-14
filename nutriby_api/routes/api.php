@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ChildController;
 use App\Http\Controllers\Api\RecipeController;   
 use App\Http\Controllers\Api\AllergyController;
 use App\Http\Controllers\Api\WeeklyPlanController;
+use App\Http\Controllers\Api\IngredientController;
 
 // Public routes for authentication
 Route::post('/register', [AuthController::class, 'register']);
@@ -16,7 +17,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Nanti kita akan tambahkan route lain yang butuh login di sini
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/recipes/{recipe}', [RecipeController::class, 'show']);
     Route::get('/allergies', [AllergyController::class, 'index']);
     Route::get('/allergies/{allergy}', [AllergyController::class, 'show']);
+    Route::get('/ingredients', [IngredientController::class, 'index']);
 
     Route::post('/children/{child}/weekly-plan/generate', [WeeklyPlanController::class, 'generate']);
 });

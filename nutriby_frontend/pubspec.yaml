@@ -18,6 +18,7 @@ dependencies:
   # 1. Untuk Komunikasi dengan Backend (API Laravel)
   # Paket standar dan kuat untuk membuat permintaan HTTP GET, POST, dll.
   http: ^1.2.1
+  flutter_secure_storage: ^9.1.1
 
   # 2. Untuk Manajemen State (Mengelola Data di Seluruh Aplikasi)
   # Cara yang direkomendasikan dan mudah untuk mengelola state seperti
@@ -53,10 +54,10 @@ flutter:
   # Deklarasikan folder di mana Anda akan menyimpan gambar lokal atau file lainnya.
   assets:
     - assets/fonts/
-    - assets/images/ # Buat folder ini untuk logo atau gambar statis lainnya
+    - assets/images/
 
   # --- Font Kustom ---
-  # Deklarasi untuk font Inter yang sudah kita bahas.
+  # Deklarasi untuk fonts Inter yang sudah kita bahas.
   fonts:
     - family: Inter
       fonts:
