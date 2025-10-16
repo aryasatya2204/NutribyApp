@@ -69,6 +69,11 @@ class BudgetRecommendationService
         // Filter recipes based on hard constraints (age, allergies).
         $eligibleRecipes = Recipe::query()
             ->where('min_age_months', '<=', $child->birth_date->diffInMonths(now()))
+            ->where(function ($query) use ($child) {
+                $ageInMonths = $child->birth_date->diffInMonths(now());
+                $query->whereNull('max_age_months')
+                    ->orWhere('max_age_months', '>=', $ageInMonths);
+            })
             ->whereDoesntHave('ingredients', function ($query) use ($allergyIngredientIds) {
                 $query->whereIn('id', $allergyIngredientIds);
             })
@@ -90,8 +95,8 @@ class BudgetRecommendationService
             $recipe->score = $score;
             return $recipe;
         })
-        ->sortByDesc('score')
-        ->take(self::IDEAL_RECIPE_POOL_SIZE);
+            ->sortByDesc('score')
+            ->take(self::IDEAL_RECIPE_POOL_SIZE);
     }
 
     /**
@@ -108,10 +113,10 @@ class BudgetRecommendationService
 
         // The 'min' budget is based on the average cost of the cheaper half of ideal recipes.
         $avgCostMin = $sortedByCost->take(floor($poolCount / 2))->avg('estimated_cost');
-        
+
         // The 'max' budget is based on the average cost of the more expensive half.
         $avgCostMax = $sortedByCost->skip(floor($poolCount / 2))->avg('estimated_cost');
-        
+
         // Extrapolate to a full month (3 meals a day for 30 days).
         $minBudget = $avgCostMin * 3 * 30;
         $maxBudget = $avgCostMax * 3 * 30;

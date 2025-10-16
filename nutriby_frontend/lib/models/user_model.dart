@@ -9,7 +9,7 @@ class User {
     required this.email,
   });
 
-  // Factory constructor untuk membuat instance User dari JSON map
+  // Factory constructor to create a User from JSON data
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],

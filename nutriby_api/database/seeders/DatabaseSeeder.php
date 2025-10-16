@@ -2,38 +2,26 @@
 
 namespace Database\Seeders;
 
-// Tambahkan ini di atas
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // HAPUS ATAU KOMENTARI KODE BAWAAN SEPERTI DI BAWAH INI:
-        // \App\Models\User::factory(10)->create();
-        
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        // GANTI DENGAN KODE SEDERHANA INI:
-        // Membuat satu user 'test' untuk development, hanya dengan kolom yang kita punya.
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password'), // Ganti 'password' dengan password yang Anda inginkan
-        ]);
-
-        // Panggil seeder kita yang lain
+        // Urutan ini sangat penting!
         $this->call([
+            IngredientSeeder::class,      // 1. Buat "kamus" bahan dulu
+            RecipeSeeder::class,          // 2. Buat resep menggunakan bahan yang ada
+            AllergySeeder::class,         // 3. Buat data alergi menggunakan bahan yang ada
             GrowthStandardSeeder::class,
-            // Anda bisa menambahkan RecipeSeeder, IngredientSeeder, dll. di sini
         ]);
+        
+        // Buat user untuk testing
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            ['name' => 'Test User', 'password' => Hash::make('password')]
+        );
     }
 }

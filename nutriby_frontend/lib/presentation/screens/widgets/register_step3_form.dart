@@ -1,37 +1,28 @@
 import 'package:flutter/material.dart';
-
-// Model sederhana untuk data bahan
-class Ingredient {
-  final int id;
-  final String name;
-  Ingredient({required this.id, required this.name});
-}
+import 'package:flutter/scheduler.dart';
+import 'package:nutriby_frontend/models/ingredient.dart';
+import 'package:nutriby_frontend/services/auth_service.dart';
+import 'package:nutriby_frontend/services/data_service.dart';
+import 'package:provider/provider.dart';
 
 class RegisterStep3Form extends StatefulWidget {
-  final VoidCallback onFinish;
+  final GlobalKey<FormState> formKey;
+  final Function(Map<String, dynamic> data) onFinish;
 
-  const RegisterStep3Form({super.key, required this.onFinish});
+  const RegisterStep3Form({
+    super.key,
+    required this.formKey,
+    required this.onFinish,
+  });
 
   @override
   State<RegisterStep3Form> createState() => _RegisterStep3FormState();
 }
 
 class _RegisterStep3FormState extends State<RegisterStep3Form> {
-  // TODO: Ganti list ini dengan data dari API /api/ingredients
-  final List<Ingredient> _allIngredients = [
-    Ingredient(id: 1, name: 'Udang'),
-    Ingredient(id: 2, name: 'Telur'),
-    Ingredient(id: 3, name: 'Susu Sapi'),
-    Ingredient(id: 4, name: 'Kacang Tanah'),
-    Ingredient(id: 5, name: 'Ikan Tuna'),
-    Ingredient(id: 6, name: 'Ayam'),
-    Ingredient(id: 7, name: 'Brokoli'),
-    Ingredient(id: 8, name: 'Wortel'),
-    Ingredient(id: 9, name: 'Hati Ayam'),
-    Ingredient(id: 10, name: 'Tahu'),
-    Ingredient(id: 11, name: 'Tempe'),
-    Ingredient(id: 12, name: 'Bayam'),
-  ];
+  final DataService _dataService = DataService();
+  List<Ingredient> _allIngredients = [];
+  bool _isLoading = true;
 
   final Set<Ingredient> _selectedAllergies = {};
   final Set<Ingredient> _selectedFavorites = {};
@@ -40,22 +31,67 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
   final TextEditingController _favoriteController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _fetchIngredients();
+    });
+  }
+
+  @override
   void dispose() {
     _allergyController.dispose();
     _favoriteController.dispose();
     super.dispose();
   }
 
-  // Fungsi untuk menampilkan dialog multi-select
+  Future<void> _fetchIngredients() async {
+    // Cek apakah token ada, meskipun tidak dikirimkan ke service
+    // Ini penting untuk memastikan user sudah login di step sebelumnya
+    final tokenExists = Provider.of<AuthService>(context, listen: false).token != null;
+    if (!tokenExists) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: Sesi autentikasi tidak ditemukan.')),
+        );
+      }
+      return;
+    }
+
+    try {
+      // Perbaikan: getIngredients tidak lagi memerlukan token sebagai argumen
+      final ingredients = await _dataService.getIngredients();
+      if (mounted) {
+        setState(() {
+          _allIngredients = ingredients;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data bahan: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  void _updateTextFields() {
+    _allergyController.text = _selectedAllergies.map((i) => i.name).join(', ');
+    _favoriteController.text = _selectedFavorites.map((i) => i.name).join(', ');
+  }
+
   Future<void> _showMultiSelectDialog({
-    required BuildContext context,
     required String title,
     required List<Ingredient> items,
-    required Set<Ingredient> initialSelections,
+    required Set<Ingredient> currentSelections,
+    required Set<Ingredient> disabledSelections, // Parameter baru
   }) async {
-    final Set<Ingredient> tempSelections = {...initialSelections};
+    final Set<Ingredient> tempSelections = {...currentSelections};
 
-    final Set<Ingredient>? result = await showDialog<Set<Ingredient>>(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -63,20 +99,34 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (context, setStateDialog) {
               return SizedBox(
                 width: double.maxFinite,
-                child: ListView.builder(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                    : ListView.builder(
                   shrinkWrap: true,
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final item = items[index];
                     final isSelected = tempSelections.any((i) => i.id == item.id);
+
+                    // --- PERUBAHAN 2: Cek apakah item ini harus nonaktif ---
+                    final bool isDisabled = disabledSelections.any((i) => i.id == item.id);
+
                     return CheckboxListTile(
-                      title: Text(item.name, style: const TextStyle(color: Colors.white)),
+                      title: Text(
+                        item.name,
+                        // --- PERUBAHAN 3: Ubah warna teks jika nonaktif ---
+                        style: TextStyle(
+                          color: isDisabled ? Colors.white54 : Colors.white,
+                          decoration: isDisabled ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
                       value: isSelected,
-                      onChanged: (bool? selected) {
-                        setState(() {
+                      // --- PERUBAHAN 4: Set `onChanged` ke null untuk menonaktifkan ---
+                      onChanged: isDisabled ? null : (bool? selected) {
+                        setStateDialog(() {
                           if (selected == true) {
                             tempSelections.add(item);
                           } else {
@@ -92,7 +142,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
               );
             },
           ),
-          actions: <Widget>[
+          actions: [
             TextButton(
               child: const Text('Batal', style: TextStyle(color: Colors.white70)),
               onPressed: () => Navigator.of(context).pop(),
@@ -100,28 +150,24 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
               child: const Text('Pilih', style: TextStyle(color: Color(0xFFC70039))),
-              onPressed: () => Navigator.of(context).pop(tempSelections),
+              onPressed: () {
+                setState(() {
+                  if (title.contains('Alergi')) {
+                    _selectedAllergies.clear();
+                    _selectedAllergies.addAll(tempSelections);
+                  } else {
+                    _selectedFavorites.clear();
+                    _selectedFavorites.addAll(tempSelections);
+                  }
+                  _updateTextFields();
+                });
+                Navigator.of(context).pop();
+              },
             ),
           ],
         );
       },
     );
-
-    if (result != null) {
-      setState(() {
-        if (title.contains('Alergi')) {
-          _selectedAllergies
-            ..clear()
-            ..addAll(result);
-          _allergyController.text = _selectedAllergies.map((i) => i.name).join(', ');
-        } else {
-          _selectedFavorites
-            ..clear()
-            ..addAll(result);
-          _favoriteController.text = _selectedFavorites.map((i) => i.name).join(', ');
-        }
-      });
-    }
   }
 
   @override
@@ -130,58 +176,64 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 20),
-          const Image(image: AssetImage('assets/images/gambar_bayi.png'), height: 60, color: Colors.white),
-          const SizedBox(height: 8),
-          const Text('NutriBy', textAlign: TextAlign.center, style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 12),
-          const Text('Lengkapi alergi & kesukaan anak', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.white70)),
-          const SizedBox(height: 48),
+      child: Form(
+        key: widget.formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ... (Header tidak berubah)
+            const SizedBox(height: 20),
+            const Image(image: AssetImage('assets/images/gambar_bayi.png'), height: 60, color: Colors.white),
+            const SizedBox(height: 8),
+            const Text('NutriBy', textAlign: TextAlign.center, style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(height: 12),
+            const Text('Lengkapi alergi & kesukaan anak', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.white70)),
+            const SizedBox(height: 48),
 
-          // Field untuk Alergi
-          _buildDropdownField(
-            label: 'Alergi Anak (jika ada)',
-            controller: _allergyController,
-            onTap: () => _showMultiSelectDialog(
-              context: context,
-              title: 'Pilih Alergi',
-              items: _allIngredients,
-              initialSelections: _selectedAllergies,
+            // --- PERUBAHAN 5: Kirim state yang berlawanan ke `disabledSelections` ---
+            _buildDropdownField(
+              label: 'Alergi Anak (jika ada)',
+              controller: _allergyController,
+              onTap: () => _showMultiSelectDialog(
+                title: 'Pilih Alergi',
+                items: _allIngredients,
+                currentSelections: _selectedAllergies,
+                disabledSelections: _selectedFavorites, // Kirim daftar favorit
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-
-          // Field untuk Makanan Kesukaan
-          _buildDropdownField(
-            label: 'Makanan Kesukaan',
-            controller: _favoriteController,
-            onTap: () => _showMultiSelectDialog(
-              context: context,
-              title: 'Pilih Makanan Kesukaan',
-              items: _allIngredients,
-              initialSelections: _selectedFavorites,
+            const SizedBox(height: 20),
+            _buildDropdownField(
+              label: 'Makanan Kesukaan',
+              controller: _favoriteController,
+              onTap: () => _showMultiSelectDialog(
+                title: 'Pilih Makanan Kesukaan',
+                items: _allIngredients,
+                currentSelections: _selectedFavorites,
+                disabledSelections: _selectedAllergies, // Kirim daftar alergi
+              ),
             ),
-          ),
-          const SizedBox(height: 60),
-
-          ElevatedButton(
-            onPressed: widget.onFinish,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            const SizedBox(height: 60),
+            ElevatedButton(
+              onPressed: () {
+                final data = {
+                  'allergy_ids': _selectedAllergies.map((e) => e.id).toList(),
+                  'favorite_ids': _selectedFavorites.map((e) => e.id).toList(),
+                };
+                widget.onFinish(data);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              ),
+              child: const Text('Selesai', style: TextStyle(fontSize: 18, color: primaryColor, fontWeight: FontWeight.bold)),
             ),
-            child: const Text('Selesai', style: TextStyle(fontSize: 18, color: primaryColor, fontWeight: FontWeight.bold)),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // Helper widget untuk membuat field dropdown palsu
   Widget _buildDropdownField({
     required String label,
     required TextEditingController controller,
@@ -190,10 +242,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-        ),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -201,6 +250,8 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
           onTap: onTap,
           style: const TextStyle(color: Colors.white, fontSize: 16),
           decoration: const InputDecoration(
+            hintText: "Ketuk untuk memilih",
+            hintStyle: TextStyle(color: Colors.white54),
             suffixIcon: Icon(Icons.arrow_drop_down, color: Colors.white70),
             enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white, width: 2)),

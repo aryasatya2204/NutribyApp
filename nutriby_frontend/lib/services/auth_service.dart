@@ -1,51 +1,82 @@
+// lib/services/auth_service.dart (FIXED)
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:nutriby_frontend/models/user_model.dart';
-import 'package:nutriby_frontend/services/api_service.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import '../models/user_model.dart';
 
 class AuthService with ChangeNotifier {
-  final ApiService _apiService = ApiService();
-  final _storage = const FlutterSecureStorage();
+  // Perbaikan: Samakan base URL dengan ApiService
+  final String _baseUrl = 'http://10.0.2.2:8000/api';
 
+  bool _isLoading = false;
   User? _user;
   String? _token;
-  bool _isLoading = false;
 
+  bool get isLoading => _isLoading;
   User? get user => _user;
   String? get token => _token;
-  bool get isLoading => _isLoading;
-  bool get isAuthenticated => _token != null;
 
-  void _setLoading(bool value) {
-    _isLoading = value;
+  void _setLoading(bool loading) {
+    _isLoading = loading;
     notifyListeners();
   }
 
-  Future<void> login(String email, String password) async {
-    _setLoading(true);
-    try {
-      final response = await _apiService.login(email, password);
+  Future<void> register({ required String name, required String email, required String password }) async {
+    final url = Uri.parse('$_baseUrl/register');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: json.encode({'name': name, 'email': email, 'password': password}),
+    );
 
-      _user = User.fromJson(response['user']);
-      _token = response['access_token'];
-
-      // Simpan token ke secure storage
-      await _storage.write(key: 'auth_token', value: _token);
-      await _storage.write(key: 'user_name', value: _user!.name);
-
-      _setLoading(false);
-    } catch (e) {
-      _setLoading(false);
-      // Melempar kembali error untuk ditangani oleh UI
-      rethrow;
+    final responseBody = json.decode(response.body);
+    if (response.statusCode != 201) {
+      // Memberikan pesan error yang lebih informatif dari backend
+      throw Exception(responseBody['message'] ?? 'Registrasi gagal');
     }
+  }
+
+  Future<void> login({ required String email, required String password }) async {
+    _setLoading(true);
+    final url = Uri.parse('$_baseUrl/login');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        body: json.encode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        _token = data['access_token'];
+        _user = User.fromJson(data['user']);
+        await _saveToken(_token!);
+      } else {
+        final errorData = json.decode(response.body);
+        // Memberikan pesan error dari backend
+        throw Exception(errorData['message'] ?? 'Email atau password salah.');
+      }
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
   }
 
   Future<void> logout() async {
     _user = null;
     _token = null;
-    await _storage.deleteAll();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
     notifyListeners();
-    // TODO: Tambahkan pemanggilan API /logout jika diperlukan
+  }
+
+  Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('token');
   }
 }

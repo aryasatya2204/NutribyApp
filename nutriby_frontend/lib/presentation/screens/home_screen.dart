@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutriby_frontend/presentation/screens/profile_screen.dart';
 import 'package:nutriby_frontend/presentation/screens/widgets/features_tab.dart';
 import 'package:nutriby_frontend/presentation/screens/widgets/information_tab.dart';
 
@@ -7,51 +8,49 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Warna utama dari UI
-    const Color primaryColor = Color.fromRGBO(163, 25, 25, 1);
+    // Warna utama yang konsisten dengan halaman login/register
+    const Color primaryColor = Color(0xFFC70039);
 
     return DefaultTabController(
-      length: 2, // Kita punya 2 tab: Information & Features
+      length: 2,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey[50], // Latar belakang netral
         appBar: AppBar(
           backgroundColor: primaryColor,
-          elevation: 0,
-          // Tombol Profile di kiri
+          elevation: 1,
           leading: IconButton(
             icon: const Icon(Icons.person_outline, color: Colors.white, size: 30),
             onPressed: () {
-              // TODO: Navigasi ke halaman Profile
+              // Navigasi ke Halaman Profile baru
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
             },
           ),
-          // Logo di tengah
           title: const Image(
-            image: AssetImage('assets/images/logo_putih.png'), // Pastikan path logo benar
+            image: AssetImage('assets/images/gambar_bayi.png'),
             height: 40,
           ),
           centerTitle: true,
-          // TabBar di bagian bawah AppBar
           bottom: const TabBar(
             indicatorColor: Colors.white,
             indicatorWeight: 3.0,
-            labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            unselectedLabelStyle: TextStyle(fontSize: 16),
+            labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+            unselectedLabelStyle: TextStyle(fontSize: 16, fontFamily: 'Inter'),
             tabs: [
-              Tab(text: 'INFORMATION'),
-              Tab(text: 'FEATURES'),
+              Tab(text: 'INFORMASI'),
+              Tab(text: 'FITUR'),
             ],
           ),
         ),
-        // Konten akan berubah sesuai tab yang dipilih
         body: const TabBarView(
           children: [
             InformationTab(),
             FeaturesTab(),
           ],
         ),
-        // Footer Copyright
         bottomNavigationBar: BottomAppBar(
-          color: const Color.fromRGBO(80, 80, 80, 1),
+          color: const Color(0xFF333333), // Warna hitam/abu-abu tua
           child: Container(
             height: 50,
             alignment: Alignment.center,

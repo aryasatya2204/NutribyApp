@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:nutriby_frontend/data/malnutrition_data.dart';
+import 'package:nutriby_frontend/models/child.dart';
+import 'package:nutriby_frontend/services/child_service.dart';
 
 class InformationTab extends StatefulWidget {
   const InformationTab({super.key});
@@ -8,152 +11,250 @@ class InformationTab extends StatefulWidget {
 }
 
 class _InformationTabState extends State<InformationTab> {
+  final PageController _pageController = PageController(viewportFraction: 0.85);
   int _currentPage = 0;
-  final PageController _pageController = PageController();
 
-  // Data dummy untuk carousel
+  // State untuk menampung data anak yang akan diambil dari server
+  late Future<List<Child>> _childrenFuture;
+
+  // Data untuk carousel (bisa tetap statis atau diambil dari API di masa depan)
   final List<Map<String, String>> carouselItems = [
     {
-      'title': 'Anak Indonesia Kekurangan Nutrisi?',
-      'subtitle': 'Berdasarkan Ahli Gizi Unusa, gizi anak di Indonesia masih menjadi masalah serius...',
+      'title': 'Gizi Seimbang, Anak Cemerlang',
+      'subtitle': 'Pastikan MPASI si kecil kaya akan protein hewani untuk tumbuh kembang otaknya.',
+      'image_placeholder': 'assets/images/placeholder_gizi.png',
     },
     {
       'title': 'Pentingnya 1000 Hari Pertama',
       'subtitle': 'Masa emas pertumbuhan otak dan fisik anak yang tidak boleh terlewatkan.',
+      'image_placeholder': 'assets/images/placeholder_1000hari.png',
     },
     {
       'title': 'Kenali Tanda Stunting',
       'subtitle': 'Anak lebih pendek dari teman sebayanya? Mungkin itu salah satu tandanya.',
+      'image_placeholder': 'assets/images/placeholder_stunting.png',
     },
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Panggil service untuk mengambil data anak saat widget pertama kali dibuat
+    _childrenFuture = ChildService().getMyChildren();
+  }
+
+  /// Menghitung umur dari string tanggal lahir (yyyy-MM-dd)
+  String _calculateAge(String birthDateStr) {
+    try {
+      final birthDate = DateTime.parse(birthDateStr);
+      final now = DateTime.now();
+      int years = now.year - birthDate.year;
+      int months = now.month - birthDate.month;
+
+      if (now.day < birthDate.day) {
+        months--;
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      if (years > 0) {
+        return '$years tahun, $months bulan';
+      }
+      return '$months bulan';
+    } catch (e) {
+      return 'N/A';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color.fromRGBO(163, 25, 25, 1);
+    const Color primaryColor = Color(0xFFC70039);
+    const Color yellowColor = Color(0xFFFFE082);
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Bagian Umur Anak
-          Container(
-            color: primaryColor,
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
-            child: const Text(
-              '3 tahun 2 bulan', // Data umur anak
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 18),
+    return FutureBuilder<List<Child>>(
+      future: _childrenFuture,
+      builder: (context, snapshot) {
+        // Tampilan saat data sedang dimuat dari server
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: primaryColor));
+        }
+        // Tampilan jika terjadi error saat mengambil data
+        if (snapshot.hasError) {
+          return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
+        }
+        // Tampilan jika user belum punya data anak
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                'Anda belum memiliki data anak.\nSilakan tambahkan data anak di halaman profil.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
+          );
+        }
 
-          // Carousel Section
-          SizedBox(
-            height: 180,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: carouselItems.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                return _buildCarouselItem(
-                  title: carouselItems[index]['title']!,
-                  subtitle: carouselItems[index]['subtitle']!,
-                  color: primaryColor.withOpacity(0.9),
+        // Jika data berhasil diambil, gunakan data anak pertama dalam daftar
+        final Child firstChild = snapshot.data!.first;
+        final String childAge = _calculateAge(firstChild.birthDate);
+
+        // UI utama yang ditampilkan setelah data siap
+        return ListView(
+          padding: const EdgeInsets.only(bottom: 24),
+          children: [
+            // Header Umur Anak (Dinamis)
+            Container(
+              color: primaryColor,
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Text(
+                'Anak Anda: $childAge',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Carousel Section
+            SizedBox(
+              height: 180,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: carouselItems.length,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                itemBuilder: (context, index) {
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      double value = 1.0;
+                      if (_pageController.position.haveDimensions) {
+                        value = (_pageController.page! - index).abs();
+                        value = (1 - (value * 0.15)).clamp(0.85, 1.0);
+                      }
+                      return Center(
+                        child: SizedBox(
+                          height: Curves.easeInOut.transform(value) * 180,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _buildCarouselItem(
+                      title: carouselItems[index]['title']!,
+                      subtitle: carouselItems[index]['subtitle']!,
+                      imagePath: carouselItems[index]['image_placeholder']!,
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Indikator dots untuk carousel
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(carouselItems.length, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                  width: _currentPage == index ? 24 : 8,
+                  height: 8,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: _currentPage == index ? primaryColor : Colors.grey.shade400,
+                  ),
                 );
-              },
+              }),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 32),
 
-          // Indikator dots untuk carousel
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(carouselItems.length, (index) {
-              return Container(
-                width: 10,
-                height: 10,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+            // Accordion Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _currentPage == index ? primaryColor : Colors.grey.shade400,
+                  color: yellowColor,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-              );
-            }),
-          ),
-          const SizedBox(height: 24),
-
-          // Bagian Informasi Malnutrisi (Accordion)
-          Container(
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: const Color.fromRGBO(255, 224, 130, 1), // Warna kuning
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Kenali Malnutrisi Pada Anak',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Kenali Malnutrisi Pada Anak',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+                    ),
+                    const SizedBox(height: 10),
+                    ...malnutritionData.map((item) => _buildExpansionTile(item.title, item.content)).toList(),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                _buildExpansionTile('Apa itu Malnutrisi Anak?'),
-                _buildExpansionTile('Penyebab Malnutrisi Anak'),
-                _buildExpansionTile('Dampak Malnutrisi Anak'),
-                _buildExpansionTile('Atasi Malnutrisi Anak'),
-                _buildExpansionTile('Jenis Malnutrisi Anak'),
-                _buildExpansionTile('Data Malnutrisi Anak'),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 
-  // Helper widget untuk item carousel
-  Widget _buildCarouselItem({required String title, required String subtitle, required Color color}) {
+  Widget _buildCarouselItem({required String title, required String subtitle, required String imagePath}) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: color,
         borderRadius: BorderRadius.circular(20),
-        // TODO: Ganti dengan gambar jika sudah ada
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 8),
-          Text(subtitle, style: const TextStyle(fontSize: 16, color: Colors.white70)),
+        image: DecorationImage(
+          image: AssetImage(imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.darken),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, height: 1.2)),
+            const SizedBox(height: 8),
+            Text(subtitle, style: const TextStyle(fontSize: 14, color: Colors.white70)),
+          ],
+        ),
       ),
     );
   }
 
-  // Helper widget untuk ExpansionTile (efek dropdown)
-  Widget _buildExpansionTile(String title) {
+  Widget _buildExpansionTile(String title, String content) {
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-        iconColor: Colors.black54,
-        collapsedIconColor: Colors.black54,
-        tilePadding: EdgeInsets.zero,
-        children: const [
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+        iconColor: const Color(0xFF333333),
+        collapsedIconColor: const Color(0xFF333333),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Text(
-              'Ini adalah konten dummy. Informasi detail akan ditampilkan di sini ketika data sudah terhubung dengan backend atau sumber data lainnya.',
-              style: TextStyle(color: Colors.black54),
+              content,
+              style: TextStyle(color: Colors.grey[800], height: 1.5),
             ),
           ),
         ],

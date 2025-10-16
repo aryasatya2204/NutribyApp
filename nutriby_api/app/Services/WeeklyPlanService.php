@@ -42,6 +42,11 @@ class WeeklyPlanService
             // Rule: Must be appropriate for the child's age.
             ->where('min_age_months', '<=', $ageInMonths)
 
+            ->where(function ($query) use ($ageInMonths) {
+                $query->whereNull('max_age_months')
+                    ->orWhere('max_age_months', '>=', $ageInMonths);
+            })
+
             // Rule: Must be within the daily budget.
             ->where('estimated_cost', '<=', $dailyBudget)
 
@@ -72,7 +77,7 @@ class WeeklyPlanService
             if (str_contains($nutritionalStatus, 'Stunting') && $recipe->protein_grams > 10) {
                 $score += 15; // High priority boost
             }
-            
+
             // Priority: If underweight (kurus), boost high-calorie recipes.
             if (str_contains($nutritionalStatus, 'Kurang') && $recipe->calories > 150) {
                 $score += 10;

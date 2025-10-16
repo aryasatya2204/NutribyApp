@@ -15,6 +15,7 @@ class Recipe extends Model
         'instructions',
         'image_url',
         'min_age_months',
+        'max_age_months',
         'texture',
         'estimated_cost',
         'serving_size',

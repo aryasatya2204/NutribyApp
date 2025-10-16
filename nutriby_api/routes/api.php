@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/children/{child}', [ChildController::class, 'show']); // Mendapatkan detail satu anak
     Route::put('/children/{child}', [ChildController::class, 'update']); // Memperbarui data anak
 
+    Route::patch('/children/{child}', [ChildController::class, 'update']);
+    
     Route::get('/recipes/search', [RecipeController::class, 'search']);
     Route::get('/recipes', [RecipeController::class, 'index']);
     Route::get('/recipes/{recipe}', [RecipeController::class, 'show']);

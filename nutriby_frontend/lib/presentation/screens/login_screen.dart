@@ -5,6 +5,7 @@ import 'package:nutriby_frontend/presentation/screens/register_screen.dart';
 import 'package:nutriby_frontend/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -26,28 +27,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    // 1. Validasi form
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final authService = Provider.of<AuthService>(context, listen: false);
 
     try {
-      // 2. Panggil service login
       await authService.login(
-        _emailController.text,
-        _passwordController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
       );
 
-      // 3. Jika berhasil, navigasi ke halaman utama
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()), // Ganti dengan halaman utama Anda
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       }
     } catch (e) {
-      // 4. Jika gagal, tampilkan pesan error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -97,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
 
               // Tombol Login dengan Indikator Loading
-              authService.isLoading
+              context.watch<AuthService>().isLoading
                   ? const Center(child: CircularProgressIndicator(color: Colors.white))
                   : _buildLoginButton(),
 

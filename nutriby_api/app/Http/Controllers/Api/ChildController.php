@@ -99,29 +99,52 @@ class ChildController extends Controller
      */
     public function update(Request $request, Child $child)
     {
-        // Authorization check
+        // 1. Otorisasi: Pastikan user hanya bisa update data anaknya sendiri
         if ($request->user()->id !== $child->user_id) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
+        // 2. Validasi Fleksibel: Gunakan 'sometimes' agar field tidak wajib ada semua
         $validator = Validator::make($request->all(), [
-            // User cannot edit name and birth date for data integrity.
-            'current_weight' => 'required|numeric|min:1',
-            'current_height' => 'required|numeric|min:20',
-            'parent_monthly_income' => 'required|integer|min:0',
+            // Validasi data inti (jika dikirim)
+            'current_weight' => 'sometimes|required|numeric|min:1',
+            'current_height' => 'sometimes|required|numeric|min:20',
+            'parent_monthly_income' => 'sometimes|required|integer|min:0',
+
+            // Validasi data preferensi (jika dikirim)
+            'allergy_ids' => 'sometimes|array',
+            'allergy_ids.*' => 'integer|exists:ingredients,id',
+            'favorite_ids' => 'sometimes|array',
+            'favorite_ids.*' => 'integer|exists:ingredients,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        // 1. Update the child's core data.
-        $child->update($validator->validated());
+        // Gunakan transaction untuk keamanan data
+        DB::transaction(function () use ($request, $child) {
+            // 3. Update Data Inti (jika ada dalam request)
+            if ($request->has(['current_weight', 'current_height', 'parent_monthly_income'])) {
+                $child->update($request->only(['current_weight', 'current_height', 'parent_monthly_income']));
+                // Jalankan ulang service cerdas jika data inti berubah
+                $this->processChildData($child);
+            }
 
-        // 2. Re-run our intelligent engines with the new data.
-        $this->processChildData($child);
+            // 4. Update Alergi (jika ada dalam request)
+            if ($request->has('allergy_ids')) {
+                // 'sync' akan menghapus yang lama dan menambah yang baru. Sempurna untuk update.
+                $child->allergies()->sync($request->allergy_ids);
+            }
 
-        return response()->json($child);
+            // 5. Update Makanan Kesukaan (jika ada dalam request)
+            if ($request->has('favorite_ids')) {
+                $child->favoriteIngredients()->sync($request->favorite_ids);
+            }
+        });
+
+        // 6. Kembalikan data anak yang sudah ter-update, termasuk relasi terbarunya
+        return response()->json($child->load(['allergies', 'favoriteIngredients']));
     }
 
     /**
