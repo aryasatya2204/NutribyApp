@@ -134,7 +134,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 20),
-          const Image(image: AssetImage('assets/images/logo_putih.png'), height: 60, color: Colors.white),
+          const Image(image: AssetImage('assets/images/gambar_bayi.png'), height: 60, color: Colors.white),
           const SizedBox(height: 8),
           const Text('NutriBy', textAlign: TextAlign.center, style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 12),

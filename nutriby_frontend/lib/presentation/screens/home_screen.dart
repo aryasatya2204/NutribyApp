@@ -45,8 +45,8 @@ class HomeScreen extends StatelessWidget {
         // Konten akan berubah sesuai tab yang dipilih
         body: const TabBarView(
           children: [
-            InformationTab(), // UI dari image_fc2569.png
-            FeaturesTab(),    // UI dari image_fc2567.jpg
+            InformationTab(),
+            FeaturesTab(),
           ],
         ),
         // Footer Copyright
