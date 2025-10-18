@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutriby_frontend/presentation/screens/allergy_facts_screen.dart';
 
 // Halaman Placeholder untuk navigasi
 class FeaturePlaceholderScreen extends StatelessWidget {
@@ -52,7 +53,7 @@ class FeaturesTab extends StatelessWidget {
             imagePlaceholder: 'assets/images/feature_allergy.png',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const FeaturePlaceholderScreen(featureName: 'Fakta Alergi'),
+                builder: (_) => const AllergyFactsScreen(),
               ));
             },
           ),

@@ -52,7 +52,7 @@ class WeeklyPlanService
 
             // Rule: Must NOT contain any ingredients the child is allergic to.
             ->whereDoesntHave('ingredients', function ($query) use ($allergyIngredientIds) {
-                $query->whereIn('id', $allergyIngredientIds);
+                $query->whereIn('ingredients.id', $allergyIngredientIds);
             })
             ->with('ingredients') // Eager load ingredients for scoring
             ->get();

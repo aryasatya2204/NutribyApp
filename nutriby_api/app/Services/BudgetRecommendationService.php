@@ -75,7 +75,7 @@ class BudgetRecommendationService
                     ->orWhere('max_age_months', '>=', $ageInMonths);
             })
             ->whereDoesntHave('ingredients', function ($query) use ($allergyIngredientIds) {
-                $query->whereIn('id', $allergyIngredientIds);
+                $query->whereIn('ingredients.id', $allergyIngredientIds);
             })
             ->with('ingredients')
             ->get();

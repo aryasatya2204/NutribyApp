@@ -19,8 +19,8 @@ class Allergy extends Model
     /**
      * Get the ingredient that causes this allergy.
      */
-    public function ingredient()
+    public function ingredients()
     {
-        return $this->belongsTo(Ingredient::class);
+        return $this->belongsToMany(Ingredient::class, 'allergy_ingredient');
     }
 }

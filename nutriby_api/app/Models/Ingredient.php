@@ -26,4 +26,9 @@ class Ingredient extends Model
     {
         return $this->hasOne(Allergy::class);
     }
+
+    public function allergies()
+    {
+        return $this->belongsToMany(Allergy::class, 'allergy_ingredient');
+    }
 }

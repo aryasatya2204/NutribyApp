@@ -68,9 +68,15 @@ class RegistrationSummaryScreen extends StatelessWidget {
               const Icon(Icons.check_circle_outline, color: Colors.white, size: 80),
               const SizedBox(height: 24),
               Text(
-                'Hai $userName, sang $title telah tiba!',
+                'Selamat! Pendaftaran ${child.name} berhasil.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold, height: 1.3),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Data si kecil sudah kami simpan.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
               const SizedBox(height: 32),
               _buildInfoCard(

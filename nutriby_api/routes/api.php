@@ -32,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/recipes/search', [RecipeController::class, 'search']);
     Route::get('/recipes', [RecipeController::class, 'index']);
     Route::get('/recipes/{recipe}', [RecipeController::class, 'show']);
+    Route::get('/ingredients', [IngredientController::class, 'index']);
+    Route::get('/allergies/search', [AllergyController::class, 'search']);
     Route::get('/allergies', [AllergyController::class, 'index']);
     Route::get('/allergies/{allergy}', [AllergyController::class, 'show']);
     Route::get('/ingredients', [IngredientController::class, 'index']);

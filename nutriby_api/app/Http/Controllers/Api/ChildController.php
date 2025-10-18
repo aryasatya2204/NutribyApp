@@ -27,7 +27,7 @@ class ChildController extends Controller
      */
     public function index(Request $request)
     {
-        $children = $request->user()->children;
+        $children = $request->user()->children()->with(['allergies', 'favoriteIngredients'])->get();
         return response()->json($children);
     }
 

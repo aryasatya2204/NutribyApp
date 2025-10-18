@@ -41,17 +41,21 @@ class ChildService {
     }
   }
 
-  Future<Child> updateChildDetails({
+  Future<Child> updateChild({
     required int childId,
     required double weight,
     required double height,
     required int income,
+    required List<int> allergyIds,
+    required List<int> favoriteIds,
   }) async {
     final endpoint = '/children/$childId';
     final data = {
       'current_weight': weight,
       'current_height': height,
       'parent_monthly_income': income,
+      'allergy_ids': allergyIds,
+      'favorite_ids': favoriteIds,
     };
 
     final response = await _api.patch(endpoint, data);
@@ -60,7 +64,7 @@ class ChildService {
       return Child.fromJson(json.decode(response.body));
     } else {
       final errorData = json.decode(response.body);
-      final message = errorData['message'] ?? 'Gagal memperbarui detail anak';
+      final message = errorData['message'] ?? 'Gagal memperbarui data anak';
       throw Exception(message);
     }
   }

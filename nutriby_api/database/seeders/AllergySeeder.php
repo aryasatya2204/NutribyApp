@@ -11,39 +11,65 @@ class AllergySeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('allergies')->delete();
+        DB::transaction(function () {
+            DB::table('allergy_ingredient')->delete();
+            DB::table('allergies')->delete();
 
-        $telur = Ingredient::where('name', 'Telur Ayam')->first();
-        $udang = Ingredient::where('name', 'Udang')->first();
-        $susu = Ingredient::where('name', 'Susu UHT')->first();
-        $kacang = Ingredient::where('name', 'Kacang Hijau')->first();
+            $this->createAllergy(
+                'Alergi Telur',
+                'Ruam kulit, gatal-gatal, bengkak...',
+                'Hindari semua produk yang mengandung telur.',
+                ['Telur Ayam'],
+                null // Tidak perlu gambar grup, karena hanya 1 bahan
+            );
 
-        Allergy::create([
-            'ingredient_id' => $telur?->id,
-            'name' => 'Alergi Telur',
-            'symptoms' => 'Ruam kulit atau gatal-gatal, bengkak di sekitar mulut, gangguan pencernaan seperti muntah atau diare, hingga reaksi anafilaksis pada kasus berat.',
-            'handling_and_prevention' => 'Hindari semua produk yang mengandung telur. Perhatikan label makanan dengan cermat. Konsultasikan dengan dokter untuk diagnosis dan penanganan yang tepat. Pengenalan telur dapat dimulai sejak usia 6 bulan secara bertahap.'
+            $this->createAllergy(
+                'Alergi Seafood (Crustacea)',
+                'Gatal di mulut, biduran, pembengkakan...',
+                'Hindari udang, kepiting, lobster, dan seafood bercangkang lainnya.',
+                ['Udang', 'Cumi'],
+                'https://i.ibb.co/gv3Ym1s/seafood.png' // Gambar grup
+            );
+
+            $this->createAllergy(
+                'Alergi Kacang-kacangan',
+                'Reaksi bisa sangat berat dan cepat (anafilaksis)...',
+                'Hindari semua jenis kacang dan produk yang mungkin terkontaminasi.',
+                ['Kacang Tanah', 'Kacang Merah'],
+                'https://i.ibb.co/6X3S27L/kacang-kacangan.png' // Gambar grup
+            );
+            
+            $this->createAllergy(
+                'Alergi Susu Sapi',
+                'Masalah pencernaan (diare, muntah), ruam kulit...',
+                'Hindari susu sapi dan produk turunannya.',
+                ['Susu UHT', 'Keju'],
+                'https://i.ibb.co/8Yn4xPB/dairy.png' // Gambar grup
+            );
+            
+             $this->createAllergy(
+                'Alergi Kedelai',
+                'Gatal-gatal, eksim, sakit perut, atau diare...',
+                'Hindari produk turunan kedelai seperti tahu, tempe, edamame.',
+                ['Tahu Putih', 'Tempe', 'Edamame'],
+                'https://i.ibb.co/N1pXJv9/kedelai.png' // Gambar grup
+            );
+        });
+    }
+
+    private function createAllergy(string $name, string $symptoms, string $prevention, array $ingredientNames, ?string $groupImageUrl): void
+    {
+        $allergy = Allergy::create([
+            'name' => $name,
+            'symptoms' => $symptoms,
+            'handling_and_prevention' => $prevention,
+            'image_url' => $groupImageUrl // Menyimpan URL gambar grup
         ]);
 
-        Allergy::create([
-            'ingredient_id' => $udang?->id,
-            'name' => 'Alergi Seafood (Udang)',
-            'symptoms' => 'Gatal di mulut, ruam kulit (biduran), pembengkakan pada wajah, bibir, atau lidah, sakit perut, dan kesulitan bernapas.',
-            'handling_and_prevention' => 'Hindari udang dan jenis seafood bercangkang lainnya. Selalu informasikan riwayat alergi saat makan di luar. Siapkan obat anti-alergi sesuai anjuran dokter.'
-        ]);
+        $ingredientIds = Ingredient::whereIn('name', $ingredientNames)->pluck('id');
 
-        Allergy::create([
-            'ingredient_id' => $susu?->id,
-            'name' => 'Alergi Susu Sapi',
-            'symptoms' => 'Masalah pencernaan (diare, muntah, sembelit), ruam kulit (eksim), hingga gejala pernapasan seperti mengi. Jangan samakan dengan intoleransi laktosa.',
-            'handling_and_prevention' => 'Hindari susu sapi dan produk turunannya seperti keju dan yogurt. Gunakan formula hipoalergenik atau alternatif susu lain sesuai rekomendasi dokter anak.'
-        ]);
-
-        Allergy::create([
-            'ingredient_id' => $kacang?->id,
-            'name' => 'Alergi Kacang',
-            'symptoms' => 'Reaksi bisa sangat berat dan cepat, termasuk anafilaksis. Gejala ringan meliputi gatal-gatal, ruam, dan sakit perut.',
-            'handling_and_prevention' => 'Hindari semua jenis kacang dan produk yang mungkin terkontaminasi kacang. Baca label makanan dengan sangat teliti. Bawa selalu epinefrin auto-injector jika diresepkan oleh dokter.'
-        ]);
+        if ($ingredientIds->isNotEmpty()) {
+            $allergy->ingredients()->attach($ingredientIds);
+        }
     }
 }

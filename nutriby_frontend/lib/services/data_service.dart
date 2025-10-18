@@ -34,4 +34,20 @@ class DataService {
       throw Exception('Failed to load allergies from API');
     }
   }
+
+  Future<List<Allergy>> searchAllergies(String query) async {
+    try {
+      final response = await _api.get('/allergies/search?q=$query');
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        return data.map((item) => Allergy.fromJson(item)).toList();
+      } else {
+        throw Exception('Failed to search allergies: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error searching allergies: $e');
+      throw Exception('Failed to search allergies');
+    }
+  }
 }
