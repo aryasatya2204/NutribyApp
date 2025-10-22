@@ -11,7 +11,7 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 - **💰 Rekomendasi Budget Dinamis:** Memberikan rekomendasi rentang budget MPASI bulanan yang realistis, dihitung berdasarkan kebutuhan gizi anak dan kemampuan finansial keluarga.
 - **🍲 Generate MPASI Mingguan:** Fitur inti yang secara otomatis membuat rencana makan 21 menu untuk satu minggu penuh, disesuaikan dengan budget, usia, status gizi, alergi, dan makanan kesukaan anak.
 - **🔍 Pencarian Resep Fleksibel:** Memungkinkan pengguna mencari resep berdasarkan nama menu ataupun bahan makanan yang mereka miliki di rumah.
-- ** तथ्य Alergi:** Menyediakan informasi mengenai alergi makanan, gejala, dan cara penanganannya.
+- ** Fakta Alergi:** Menyediakan informasi mengenai alergi makanan, gejala, dan cara penanganannya.
 
 ---
 
@@ -84,7 +84,7 @@ Pastikan Anda memiliki Flutter SDK terinstal.
 
 Dokumentasi API lengkap, termasuk contoh request dan response untuk setiap endpoint, tersedia melalui Postman. Silakan impor koleksi Postman yang tersedia atau kunjungi link publikasi berikut:
 
-**[Link ke Dokumentasi API Postman Anda di Sini]**
+**[Link ke Dokumantasi API akan di letak disini (soon)]**
 
 ---
 
