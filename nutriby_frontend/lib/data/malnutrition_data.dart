@@ -1,4 +1,3 @@
-// Kelas untuk menampung data informasi
 class InfoItem {
   final String title;
   final String content;

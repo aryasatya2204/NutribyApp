@@ -13,14 +13,14 @@ class Ingredient {
   Ingredient({
     required this.id,
     required this.name,
-    this.imageUrl, // TAMBAHKAN INI
+    this.imageUrl,
   });
 
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
       id: json['id'],
       name: json['name'],
-      imageUrl: json['image_url'], // TAMBAHKAN INI
+      imageUrl: json['image_url'],
     );
   }
 }

@@ -14,10 +14,7 @@ class _InformationTabState extends State<InformationTab> {
   final PageController _pageController = PageController(viewportFraction: 0.85);
   int _currentPage = 0;
 
-  // State untuk menampung data anak yang akan diambil dari server
   late Future<List<Child>> _childrenFuture;
-
-  // Data untuk carousel (bisa tetap statis atau diambil dari API di masa depan)
   final List<Map<String, String>> carouselItems = [
     {
       'title': 'Gizi Seimbang, Anak Cemerlang',
@@ -39,11 +36,9 @@ class _InformationTabState extends State<InformationTab> {
   @override
   void initState() {
     super.initState();
-    // Panggil service untuk mengambil data anak saat widget pertama kali dibuat
     _childrenFuture = ChildService().getMyChildren();
   }
 
-  /// Menghitung umur dari string tanggal lahir (yyyy-MM-dd)
   String _calculateAge(String birthDateStr) {
     try {
       final birthDate = DateTime.parse(birthDateStr);
@@ -76,15 +71,12 @@ class _InformationTabState extends State<InformationTab> {
     return FutureBuilder<List<Child>>(
       future: _childrenFuture,
       builder: (context, snapshot) {
-        // Tampilan saat data sedang dimuat dari server
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator(color: primaryColor));
         }
-        // Tampilan jika terjadi error saat mengambil data
         if (snapshot.hasError) {
           return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
         }
-        // Tampilan jika user belum punya data anak
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(
             child: Padding(
@@ -98,15 +90,11 @@ class _InformationTabState extends State<InformationTab> {
           );
         }
 
-        // Jika data berhasil diambil, gunakan data anak pertama dalam daftar
         final Child firstChild = snapshot.data!.first;
         final String childAge = _calculateAge(firstChild.birthDate);
-
-        // UI utama yang ditampilkan setelah data siap
         return ListView(
           padding: const EdgeInsets.only(bottom: 24),
           children: [
-            // Header Umur Anak (Dinamis)
             Container(
               color: primaryColor,
               width: double.infinity,
@@ -119,7 +107,6 @@ class _InformationTabState extends State<InformationTab> {
             ),
             const SizedBox(height: 24),
 
-            // Carousel Section
             SizedBox(
               height: 180,
               child: PageView.builder(
@@ -153,7 +140,6 @@ class _InformationTabState extends State<InformationTab> {
             ),
             const SizedBox(height: 16),
 
-            // Indikator dots untuk carousel
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(carouselItems.length, (index) {
@@ -172,7 +158,6 @@ class _InformationTabState extends State<InformationTab> {
             ),
             const SizedBox(height: 32),
 
-            // Accordion Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(

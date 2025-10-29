@@ -46,8 +46,6 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
   }
 
   Future<void> _fetchIngredients() async {
-    // Cek apakah token ada, meskipun tidak dikirimkan ke service
-    // Ini penting untuk memastikan user sudah login di step sebelumnya
     final tokenExists = Provider.of<AuthService>(context, listen: false).token != null;
     if (!tokenExists) {
       if (mounted) {
@@ -60,7 +58,6 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
     }
 
     try {
-      // Perbaikan: getIngredients tidak lagi memerlukan token sebagai argumen
       final ingredients = await _dataService.getIngredients();
       if (mounted) {
         setState(() {
@@ -87,7 +84,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
     required String title,
     required List<Ingredient> items,
     required Set<Ingredient> currentSelections,
-    required Set<Ingredient> disabledSelections, // Parameter baru
+    required Set<Ingredient> disabledSelections,
   }) async {
     final Set<Ingredient> tempSelections = {...currentSelections};
 
@@ -111,20 +108,18 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
                     final item = items[index];
                     final isSelected = tempSelections.any((i) => i.id == item.id);
 
-                    // --- PERUBAHAN 2: Cek apakah item ini harus nonaktif ---
                     final bool isDisabled = disabledSelections.any((i) => i.id == item.id);
 
                     return CheckboxListTile(
                       title: Text(
                         item.name,
-                        // --- PERUBAHAN 3: Ubah warna teks jika nonaktif ---
+
                         style: TextStyle(
                           color: isDisabled ? Colors.white54 : Colors.white,
                           decoration: isDisabled ? TextDecoration.lineThrough : null,
                         ),
                       ),
                       value: isSelected,
-                      // --- PERUBAHAN 4: Set `onChanged` ke null untuk menonaktifkan ---
                       onChanged: isDisabled ? null : (bool? selected) {
                         setStateDialog(() {
                           if (selected == true) {
@@ -181,7 +176,6 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ... (Header tidak berubah)
             const SizedBox(height: 20),
             const Image(image: AssetImage('assets/images/gambar_bayi.png'), height: 60, color: Colors.white),
             const SizedBox(height: 8),
@@ -190,7 +184,6 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
             const Text('Lengkapi alergi & kesukaan anak', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.white70)),
             const SizedBox(height: 48),
 
-            // --- PERUBAHAN 5: Kirim state yang berlawanan ke `disabledSelections` ---
             _buildDropdownField(
               label: 'Alergi Anak (jika ada)',
               controller: _allergyController,
@@ -198,7 +191,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
                 title: 'Pilih Alergi',
                 items: _allIngredients,
                 currentSelections: _selectedAllergies,
-                disabledSelections: _selectedFavorites, // Kirim daftar favorit
+                disabledSelections: _selectedFavorites,
               ),
             ),
             const SizedBox(height: 20),
@@ -209,7 +202,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
                 title: 'Pilih Makanan Kesukaan',
                 items: _allIngredients,
                 currentSelections: _selectedFavorites,
-                disabledSelections: _selectedAllergies, // Kirim daftar alergi
+                disabledSelections: _selectedAllergies,
               ),
             ),
             const SizedBox(height: 60),

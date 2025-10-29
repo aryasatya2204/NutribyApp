@@ -7,13 +7,10 @@ class AllergyDetailScreen extends StatelessWidget {
 
   const AllergyDetailScreen({super.key, required this.allergy});
 
-  // Helper method untuk menentukan judul dinamis
   String _generateTitle() {
     if (allergy.ingredients.isNotEmpty) {
-      // Jika ada bahan terkait, gunakan nama bahan pertama
       return 'Kenali dampak-dampak alergi pada\n${allergy.ingredients.first.name}';
     }
-    // Jika tidak ada bahan (kasus umum), gunakan nama alerginya
     return 'Kenali dampak-dampak dari\n${allergy.name}';
   }
 
@@ -21,7 +18,6 @@ class AllergyDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xFFC70039);
 
-    // --- LOGIKA BARU UNTUK GAMBAR (PERMINTAAN #6) ---
     final String? displayImageUrl = allergy.imageUrl ??
         (allergy.ingredients.isNotEmpty ? allergy.ingredients.first.imageUrl : null);
 
@@ -62,7 +58,7 @@ class AllergyDetailScreen extends StatelessWidget {
                       Image.asset('assets/images/placeholder_gizi.png', height: 180, width: 180, fit: BoxFit.cover),
                 )
                     : Image.asset(
-                  'assets/images/placeholder_gizi.png', // Fallback placeholder
+                  'assets/images/placeholder_gizi.png',
                   height: 180,
                   width: 180,
                   fit: BoxFit.cover,
@@ -79,10 +75,8 @@ class AllergyDetailScreen extends StatelessWidget {
             ),
             _buildRelatedIngredients(context, allergy.ingredients),
             const SizedBox(height: 24),
-            // Kode ini sekarang akan berfungsi karena 'symptoms' sudah ada di model
             _buildSection('Gejala Alergi', allergy.symptoms),
             const SizedBox(height: 24),
-            // Kode ini juga akan berfungsi karena 'handlingAndPrevention' sudah ada
             _buildSection('Penanganan & Pencegahan', allergy.handlingAndPrevention),
           ],
         ),

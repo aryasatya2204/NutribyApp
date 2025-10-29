@@ -6,7 +6,6 @@ import 'dart:convert';
 import '../models/user_model.dart';
 
 class AuthService with ChangeNotifier {
-  // Perbaikan: Samakan base URL dengan ApiService
   final String _baseUrl = 'http://10.0.2.2:8000/api';
 
   bool _isLoading = false;

@@ -7,7 +7,6 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Definisikan warna utama agar mudah diubah jika diperlukan
     const Color primaryColor = Color(0xFFC70039);
 
     return Scaffold(
@@ -18,14 +17,12 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Header: Logo dan Nama Aplikasi (sesuai UI)
               const Column(
                 children: [
-                  // Ganti 'assets/images/logo.png' dengan path logo putih Anda
                   Image(
-                    image: AssetImage('assets/images/gambar_bayi.png'), // Asumsi nama logo
+                    image: AssetImage('assets/images/gambar_bayi.png'),
                     height: 80,
-                    color: Colors.white, // Pastikan logo berwarna putih
+                    color: Colors.white,
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -42,7 +39,6 @@ class WelcomeScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // 2. Sub-Teks (sesuai UI)
               const Text(
                 'Solusi pantau perkembangan anak',
                 textAlign: TextAlign.center,
@@ -52,10 +48,8 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
 
-              // Spacer untuk mendorong tombol ke bagian bawah
               const Spacer(),
 
-              // 3. Tombol "Sign Up" (sesuai UI)
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(
@@ -66,7 +60,7 @@ class WelcomeScreen extends StatelessWidget {
                   backgroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // Lebih melengkung seperti di UI
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: const Text(
@@ -80,7 +74,6 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // 4. Tombol "Log In" (sesuai UI)
               OutlinedButton(
                 onPressed: () {
                   Navigator.of(context).push(
@@ -91,7 +84,7 @@ class WelcomeScreen extends StatelessWidget {
                   side: const BorderSide(color: Colors.white, width: 2),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // Lebih melengkung seperti di UI
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: const Text(

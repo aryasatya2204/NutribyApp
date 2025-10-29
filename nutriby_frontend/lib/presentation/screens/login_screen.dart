@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/presentation/screens/home_screen.dart'; // Asumsi ada home screen
+import 'package:nutriby_frontend/presentation/screens/home_screen.dart';
 import 'package:nutriby_frontend/presentation/screens/register_screen.dart';
 import 'package:nutriby_frontend/services/auth_service.dart';
 import 'package:provider/provider.dart';
@@ -57,7 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xFFC70039);
-    // Menggunakan Consumer untuk rebuild widget saat state berubah (misal, isLoading)
     final authService = context.watch<AuthService>();
 
     return Scaffold(
@@ -74,7 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header... (Sama seperti sebelumnya)
               const SizedBox(height: 20),
               const Image(image: AssetImage('assets/images/gambar_bayi.png'), height: 60, color: Colors.white),
               const SizedBox(height: 8),
@@ -83,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
               const Text('Masuk dengan akun tertaut', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.white70)),
               const SizedBox(height: 48),
 
-              // Form Fields
               _buildEmailField(),
               const SizedBox(height: 20),
               _buildPasswordField(),
@@ -91,7 +88,6 @@ class _LoginScreenState extends State<LoginScreen> {
               _buildForgotPasswordButton(),
               const SizedBox(height: 24),
 
-              // Tombol Login dengan Indikator Loading
               context.watch<AuthService>().isLoading
                   ? const Center(child: CircularProgressIndicator(color: Colors.white))
                   : _buildLoginButton(),
@@ -105,7 +101,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Widget helpers untuk kerapian kode
   Widget _buildEmailField() {
     return TextFormField(
       controller: _emailController,

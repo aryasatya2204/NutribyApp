@@ -6,19 +6,16 @@ import 'package:nutriby_frontend/services/api_service.dart';
 class ChildService {
   final ApiService _api = ApiService();
 
-  /// Membuat data anak baru dan mengembalikan objek Child.
   Future<Child> createChild(Map<String, dynamic> childData) async {
     final response = await _api.post('/children', childData);
     if (response.statusCode == 201) {
       return Child.fromJson(json.decode(response.body));
     } else {
-      // Memberikan pesan error yang lebih spesifik dari backend
       final errorData = json.decode(response.body);
       throw Exception(errorData['message'] ?? 'Gagal membuat data anak');
     }
   }
 
-  /// Memperbarui preferensi (alergi & kesukaan) untuk anak yang sudah ada.
   Future<Child> updateChildPreferences({
     required int childId,
     required List<int> allergyIds,
@@ -69,7 +66,6 @@ class ChildService {
     }
   }
 
-  /// Mengambil daftar semua anak yang dimiliki oleh pengguna yang sedang login.
   Future<List<Child>> getMyChildren() async {
     final response = await _api.get('/children');
     if (response.statusCode == 200) {

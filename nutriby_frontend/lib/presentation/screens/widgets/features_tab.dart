@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nutriby_frontend/presentation/screens/allergy_facts_screen.dart';
 
+import '../daily_menu_setup_screen.dart';
+import '../weekly_plan_setup_screen.dart';
+
 // Halaman Placeholder untuk navigasi
 class FeaturePlaceholderScreen extends StatelessWidget {
   final String featureName;
@@ -29,19 +32,19 @@ class FeaturesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold( // Menggunakan Scaffold untuk latar belakang putih
+    return Scaffold(
       backgroundColor: Colors.white,
-      body: ListView( // Menggunakan ListView untuk scrolling
+      body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
         children: [
           _buildFeatureCard(
             context: context,
             title: 'MPASI Mingguan',
             subtitle: 'Rencana makan 7 hari penuh gizi.',
-            imagePlaceholder: 'assets/images/feature_weekly.png', // Ganti dengan path Anda
+            imagePlaceholder: 'assets/images/feature_weekly.png',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const FeaturePlaceholderScreen(featureName: 'MPASI Mingguan'),
+                builder: (_) => const WeeklyPlanSetupScreen(),
               ));
             },
           ),
@@ -65,7 +68,7 @@ class FeaturesTab extends StatelessWidget {
             imagePlaceholder: 'assets/images/feature_generate.png',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const FeaturePlaceholderScreen(featureName: 'Generate Menu'),
+                builder: (_) => const DailyMenuSetupScreen(),
               ));
             },
           ),

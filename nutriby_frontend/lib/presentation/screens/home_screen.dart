@@ -8,20 +8,18 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Warna utama yang konsisten dengan halaman login/register
     const Color primaryColor = Color(0xFFC70039);
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.grey[50], // Latar belakang netral
+        backgroundColor: Colors.grey[50],
         appBar: AppBar(
           backgroundColor: primaryColor,
           elevation: 1,
           leading: IconButton(
             icon: const Icon(Icons.person_outline, color: Colors.white, size: 30),
             onPressed: () {
-              // Navigasi ke Halaman Profile baru
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ProfileScreen()),
               );
@@ -50,7 +48,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         bottomNavigationBar: BottomAppBar(
-          color: const Color(0xFF333333), // Warna hitam/abu-abu tua
+          color: const Color(0xFF333333),
           child: Container(
             height: 50,
             alignment: Alignment.center,

@@ -20,7 +20,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Kunci GlobalKey untuk validasi di setiap form
   final _step1Key = GlobalKey<FormState>();
   final _step2Key = GlobalKey<FormState>();
   final _step3Key = GlobalKey<FormState>();
@@ -35,9 +34,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _heightController = TextEditingController();
   final _incomeController = TextEditingController();
 
-  // Map untuk mengumpulkan data dari setiap langkah
+
   final Map<String, dynamic> _registrationData = {};
-  // Variabel untuk menyimpan objek Child setelah dibuat
   Child? _createdChild;
 
   @override
@@ -54,10 +52,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // Fungsi untuk menampilkan error dengan SnackBar
+
   void _showError(String message) {
     if (mounted) {
-      // Tutup dialog loading jika ada
       Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -68,9 +65,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // --- LOGIKA ALUR BARU ---
-
-  /// STEP 1: Mendaftarkan & Login pengguna, lalu lanjut ke halaman 2
   Future<void> _handleStep1(Map<String, dynamic> data) async {
     if (!_step1Key.currentState!.validate()) return;
     _registrationData.addAll(data);
@@ -83,20 +77,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
-      // 1. Mendaftarkan pengguna
       await authService.register(
         name: _registrationData['name'],
         email: _registrationData['email'],
         password: _registrationData['password'],
       );
-      // 2. Login untuk mendapatkan token
       await authService.login(
         email: _registrationData['email'],
         password: _registrationData['password'],
       );
 
       if (mounted) {
-        Navigator.of(context).pop(); // Tutup dialog
+        Navigator.of(context).pop();
         _pageController.nextPage(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeIn,
@@ -107,11 +99,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  /// STEP 2: Membuat data anak, lalu lanjut ke halaman 3
   Future<void> _handleStep2(Map<String, dynamic> data) async {
     if (!_step2Key.currentState!.validate()) return;
 
-    // Hapus format Rupiah sebelum menyimpan
     data['parent_monthly_income'] =
         int.tryParse(data['parent_monthly_income'].replaceAll('.', '')) ?? 0;
     _registrationData.addAll(data);
@@ -124,14 +114,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final childService = ChildService();
-      // 3. Membuat data anak menggunakan token yang sudah tersimpan
       final Child newChild = await childService.createChild(_registrationData);
       setState(() {
-        _createdChild = newChild; // Simpan objek anak
+        _createdChild = newChild;
       });
 
       if (mounted) {
-        Navigator.of(context).pop(); // Tutup dialog
+        Navigator.of(context).pop();
         _pageController.nextPage(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeIn,
@@ -142,7 +131,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  /// STEP 3: Memperbarui preferensi anak dan navigasi ke halaman summary
   Future<void> _handleStep3(Map<String, dynamic> data) async {
     if (_createdChild == null) {
       _showError("Terjadi kesalahan: Data anak tidak ditemukan.");
@@ -159,7 +147,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final childService = ChildService();
-      // 4. Update data anak dengan alergi dan kesukaan
       final updatedChild = await childService.updateChildPreferences(
         childId: _createdChild!.id,
         allergyIds: _registrationData['allergy_ids'],
@@ -169,12 +156,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final authService = Provider.of<AuthService>(context, listen: false);
 
       if (mounted) {
-        Navigator.of(context).pop(); // Tutup dialog
-        // 5. Navigasi ke halaman summary
+        Navigator.of(context).pop();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (_) => RegistrationSummaryScreen(
-              child: updatedChild, // Kirim data anak yang sudah ter-update
+              child: updatedChild,
               userName: authService.user?.name ?? _registrationData['name'],
             ),
           ),
@@ -253,11 +239,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   weightController: _weightController,
                   heightController: _heightController,
                   incomeController: _incomeController,
-                  onNext: _handleStep2, // Panggil fungsi step 2
+                  onNext: _handleStep2,
                 ),
                 RegisterStep3Form(
                   formKey: _step3Key,
-                  onFinish: _handleStep3, // Panggil fungsi step 3
+                  onFinish: _handleStep3,
                 ),
               ],
             ),

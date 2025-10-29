@@ -3,12 +3,11 @@ import 'package:nutriby_frontend/models/ingredient.dart';
 class Allergy {
   final int id;
   final String name;
-  final String? imageUrl; // URL relatif dari DB (untuk gambar grup)
+  final String? imageUrl;
   final String symptoms;
   final String handlingAndPrevention;
   final List<Ingredient> ingredients;
 
-  // Helper 'getter' untuk membangun URL lengkap (GAMBAR GRUP)
   String? get fullImageUrl {
     if (imageUrl == null || imageUrl!.isEmpty) return null;
     // Ganti '10.0.2.2:8000' jika base URL server Anda berbeda

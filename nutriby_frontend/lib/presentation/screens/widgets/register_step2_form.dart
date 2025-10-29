@@ -7,7 +7,6 @@ class RegisterStep2Form extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final Function(Map<String, dynamic> data) onNext;
 
-  // Controllers passed from the parent to maintain state across pages.
   final TextEditingController nameController;
   final TextEditingController birthDateController;
   final TextEditingController weightController;
@@ -35,27 +34,22 @@ class _RegisterStep2FormState extends State<RegisterStep2Form> {
   @override
   void initState() {
     super.initState();
-    // Initialize gender if data already exists
-    // This helps preserve state when navigating back and forth
   }
 
-  /// Validates the form and triggers the onNext callback.
   void _handleNext() {
     if (widget.formKey.currentState!.validate()) {
       final data = {
-        'name': widget.nameController.text, // Backend expects 'name' for the child
+        'name': widget.nameController.text,
         'birth_date': widget.birthDateController.text,
         'gender': _selectedGender,
         'current_weight': double.tryParse(widget.weightController.text) ?? 0.0,
         'current_height': double.tryParse(widget.heightController.text) ?? 0.0,
-        // Unformat the currency string before sending to parent
         'parent_monthly_income': widget.incomeController.text.replaceAll('.', ''),
       };
       widget.onNext(data);
     }
   }
 
-  /// Opens a date picker dialog with a 2-year constraint from the current date.
   Future<void> _selectDate() async {
     final now = DateTime.now();
     final firstAllowedDate = DateTime(now.year - 2, now.month, now.day);
@@ -132,7 +126,6 @@ class _RegisterStep2FormState extends State<RegisterStep2Form> {
     );
   }
 
-  /// Builds a dropdown for gender selection.
   Widget _buildGenderDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +152,6 @@ class _RegisterStep2FormState extends State<RegisterStep2Form> {
     );
   }
 
-  /// Builds a read-only text field that triggers a date picker on tap.
   Widget _buildDateField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,7 +177,6 @@ class _RegisterStep2FormState extends State<RegisterStep2Form> {
     );
   }
 
-  /// A generic helper for building text form fields.
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,

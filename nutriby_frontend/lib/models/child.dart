@@ -52,7 +52,6 @@ class Child {
       birthDate: json['birth_date'],
       gender: json['gender'],
 
-      // Menggunakan .toString() untuk memastikan parsing aman, baik data datang sebagai String maupun num.
       currentWeight: double.parse(json['current_weight'].toString()),
       currentHeight: double.parse(json['current_height'].toString()),
       parentMonthlyIncome: int.parse(json['parent_monthly_income'].toString()),

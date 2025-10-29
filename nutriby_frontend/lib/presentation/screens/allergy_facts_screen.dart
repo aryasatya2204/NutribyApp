@@ -57,7 +57,6 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        // Tampilkan pesan error jika diperlukan
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal mencari: ${e.toString()}')),
         );
@@ -65,7 +64,6 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
     }
   }
 
-  // Widget untuk menampilkan gambar dengan aman (placeholder & error handling)
   Widget _buildSafeImage(String? imageUrl) {
     if (imageUrl == null || imageUrl.isEmpty) {
       return Image.asset('assets/images/placeholder_gizi.png',
@@ -83,7 +81,6 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
     );
   }
 
-  // Widget untuk kartu alergi bahan tunggal
   Widget _buildSingleIngredientCard(Allergy allergy, Ingredient ingredient) {
     return Card(
       elevation: 2,
@@ -92,7 +89,7 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: _buildSafeImage(ingredient.fullImageUrl), // Gunakan fullImageUrl
+          child: _buildSafeImage(ingredient.fullImageUrl),
         ),
         title: Text(ingredient.name, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(allergy.name),
@@ -106,7 +103,6 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
     );
   }
 
-  // Widget untuk kartu alergi bahan grup
   Widget _buildGroupIngredientCard(Allergy allergy) {
     return Card(
       elevation: 2,
@@ -121,7 +117,7 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
               contentPadding: EdgeInsets.zero,
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: _buildSafeImage(allergy.fullImageUrl), // Gunakan fullImageUrl
+                child: _buildSafeImage(allergy.fullImageUrl),
               ),
               title: Text(allergy.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               subtitle: Text("Grup Alergi (${allergy.ingredients.length} bahan terkait)"),
@@ -190,15 +186,11 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 final allergy = _searchResults[index];
-
-                // Logika untuk memilih tampilan kartu
                 if (allergy.ingredients.length == 1) {
                   return _buildSingleIngredientCard(allergy, allergy.ingredients.first);
                 } else if (allergy.ingredients.isNotEmpty) {
-                  // Tambahkan kondisi else if untuk keamanan
                   return _buildGroupIngredientCard(allergy);
                 } else {
-                  // Fallback jika tidak ada ingredients (seharusnya tidak terjadi)
                   return ListTile(title: Text(allergy.name));
                 }
               },

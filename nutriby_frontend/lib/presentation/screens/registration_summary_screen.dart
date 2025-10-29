@@ -38,7 +38,6 @@ class RegistrationSummaryScreen extends StatelessWidget {
   String? _getWarningMessage() {
     final ageInMonths = DateTime.now().difference(DateTime.parse(child.birthDate)).inDays ~/ 30;
 
-    // Contoh Peringatan: Jika anak di bawah 2 tahun tapi beratnya > 20kg atau tingginya > 110cm
     if (ageInMonths <= 24) {
       if (child.currentWeight > 20) {
         return "Peringatan: Berat badan anak terlihat sangat tinggi untuk usianya. Pastikan Anda memasukkan data yang benar.";
@@ -47,7 +46,7 @@ class RegistrationSummaryScreen extends StatelessWidget {
         return "Peringatan: Tinggi badan anak terlihat sangat tinggi untuk usianya. Pastikan Anda memasukkan data yang benar.";
       }
     }
-    return null; // Tidak ada peringatan
+    return null;
   }
 
   @override

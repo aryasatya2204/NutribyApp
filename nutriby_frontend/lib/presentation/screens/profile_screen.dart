@@ -27,7 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadChildData();
   }
 
-  /// Memuat atau memuat ulang data anak dari server.
   void _loadChildData() {
     setState(() {
       _childFuture = ChildService().getMyChildren().then((children) {
@@ -40,7 +39,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  /// Menghitung umur dari string tanggal lahir.
   String _calculateAge(String birthDateStr) {
     try {
       final birthDate = DateTime.parse(birthDateStr);
@@ -77,8 +75,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
 
-    // Jika dialog ditutup dan mengembalikan 'true', artinya ada perubahan yang disimpan.
-    // Maka, kita muat ulang data untuk me-refresh tampilan.
     if (result == true) {
       _loadChildData();
     }
@@ -225,7 +221,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-/// A custom dialog widget for editing profile information.
 class EditProfileDialog extends StatefulWidget {
   final Child child;
   const EditProfileDialog({super.key, required this.child});

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 
 class RegisterStep1Form extends StatefulWidget {
-  /// A global key to access and validate the form state.
   final GlobalKey<FormState> formKey;
 
-  /// Callback function to pass the collected data to the parent widget.
   final Function(Map<String, dynamic> data) onNext;
 
-  /// Text editing controllers managed by the parent to preserve input state.
   final TextEditingController nameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -27,7 +24,6 @@ class RegisterStep1Form extends StatefulWidget {
 
 class _RegisterStep1FormState extends State<RegisterStep1Form> {
 
-  /// Validates the form and triggers the onNext callback with the user's data.
   void _handleNext() {
     if (widget.formKey.currentState!.validate()) {
       final data = {
@@ -105,7 +101,6 @@ class _RegisterStep1FormState extends State<RegisterStep1Form> {
     );
   }
 
-  /// A helper method to build consistent text form fields.
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
