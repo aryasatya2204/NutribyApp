@@ -1,4 +1,3 @@
-// lib/models/child.dart (FIXED)
 import 'package:nutriby_frontend/models/ingredient.dart';
 
 class Child {

@@ -1,16 +1,10 @@
 <?php
-
-/**
- * @file RecipeController.php
- * @description Handles API requests related to recipes (listing, details, search, filtering).
- */
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Builder; // Diperlukan untuk type hinting query builder
+use Illuminate\Database\Eloquent\Builder; 
 
 class RecipeController extends Controller
 {
@@ -23,7 +17,7 @@ class RecipeController extends Controller
      */
     public function index(Request $request)
     {
-        $recipes = Recipe::with('ingredients')->paginate(10); // Default 10 per halaman
+        $recipes = Recipe::with('ingredients')->paginate(10); 
         return response()->json($recipes);
     }
 
@@ -56,12 +50,12 @@ class RecipeController extends Controller
         $query = $request->input('q');
 
         $recipes = Recipe::query()
-            ->where('title', 'LIKE', "%{$query}%") // Cari di judul
+            ->where('title', 'LIKE', "%{$query}%") 
             ->orWhereHas('ingredients', function (Builder $ingredientQuery) use ($query) {
-                $ingredientQuery->where('name', 'LIKE', "%{$query}%"); // Cari di nama bahan
+                $ingredientQuery->where('name', 'LIKE', "%{$query}%"); 
             })
-            ->with('ingredients') // Sertakan data bahan
-            ->paginate(10); // Paginasi hasil
+            ->with('ingredients') 
+            ->paginate(10); 
 
         return response()->json($recipes);
     }
