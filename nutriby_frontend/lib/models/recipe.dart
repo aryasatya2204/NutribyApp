@@ -1,4 +1,4 @@
-import 'package:nutriby_frontend/models/ingredient_pivot.dart'; // Impor model pivot baru
+import 'package:nutriby_frontend/models/ingredient_pivot.dart';
 
 class Recipe {
   final int id;
@@ -18,8 +18,8 @@ class Recipe {
   String? get fullImageUrl {
     if (imageUrl == null || imageUrl!.isEmpty) return null;
     // Sesuaikan base URL
-    // return 'http://10.0.2.2:8000/storage/$imageUrl';
-    return 'http://192.168.213.209:8000/storage/$imageUrl';
+    return 'http://10.0.2.2:8000/storage/$imageUrl';
+    // return 'http://192.168.213.209:8000/storage/$imageUrl';
   }
 
   Recipe({
@@ -42,7 +42,7 @@ class Recipe {
     List<IngredientPivot> parsedIngredients = [];
     if (json['ingredients'] != null && json['ingredients'] is List) {
       parsedIngredients = (json['ingredients'] as List)
-          .map((item) => IngredientPivot.fromJson(item)) // Gunakan fromJson dari pivot
+          .map((item) => IngredientPivot.fromJson(item))
           .toList();
     }
 

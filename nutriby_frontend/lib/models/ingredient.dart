@@ -7,8 +7,8 @@ class Ingredient {
     if (imageUrl == null || imageUrl!.isEmpty) return null;
     // Pastikan base URL ini sesuai dengan server Laravel Anda
     // (10.0.2.2:8000 untuk emulator Android, IP komputer Anda untuk device fisik)
-    // return 'http://10.0.2.2:8000/storage/$imageUrl';
-    return 'http://192.168.213.209:8000/storage/$imageUrl';
+    return 'http://10.0.2.2:8000/storage/$imageUrl';
+    // return 'http://192.168.213.209:8000/storage/$imageUrl';
   }
 
   Ingredient({

@@ -14,7 +14,7 @@ use Illuminate\Support\Collection;
  */
 class WeeklyPlanService
 {
-    private const MEALS_PER_WEEK = 21; // 7 days * 3 meals
+    private const MEALS_PER_WEEK = 21; 
 
     /**
      * The main method to generate a weekly plan for a specific child.
@@ -31,8 +31,6 @@ class WeeklyPlanService
         $favoriteIngredientIds = $child->favoriteIngredients()->pluck('ingredients.id');
         $nutritionalStatus = $child->nutritional_status_hfa;
 
-        // Use adjusted budget from options, or the default recommended budget.
-        // We divide by 4.2 weeks and 7 days to get a daily budget estimate.
         $monthlyBudget = $options['budget'] ?? $child->recommended_budget;
         $dailyBudget = $monthlyBudget / 4.2 / 7;
 
@@ -74,13 +72,31 @@ class WeeklyPlanService
             $score += $favoriteCount * 5; // Add 5 points for each favorite ingredient
 
             // Priority: If stunting, boost recipes with high protein.
-            if (str_contains($nutritionalStatus, 'Stunting') && $recipe->protein_grams > 10) {
-                $score += 15; // High priority boost
+            if (str_contains($nutritionalStatus, 'Stunting')) {
+                // Fokus utama: Resep yang dilabeli 'height_booster' (Peninggi Badan)
+                if ($recipe->nutrition_focus === 'height_booster') {
+                    $score += 25; // Prioritas Tertinggi!
+                }
+                // Backup: Jika tidak ada label, cari yang Zinc-nya tinggi (> 2mg per porsi)
+                elseif ($recipe->zinc_total_mg >= 2) {
+                    $score += 20;
+                }
+                // Backup 2: Protein tetap dihargai
+                elseif ($recipe->protein_grams > 10) {
+                    $score += 10;
+                }
             }
 
             // Priority: If underweight (kurus), boost high-calorie recipes.
-            if (str_contains($nutritionalStatus, 'Kurang') && $recipe->calories > 150) {
-                $score += 10;
+            if (str_contains($nutritionalStatus, 'Kurang') || str_contains($nutritionalStatus, 'Buruk')) {
+                // Prioritas 1: Resep khusus penambah berat badan
+                if ($recipe->nutrition_focus === 'weight_booster') {
+                    $score += 25; 
+                }
+                // Prioritas 2: Kalori tinggi (> 150 kkal)
+                elseif ($recipe->calories > 150) {
+                    $score += 12;
+                }
             }
 
             $recipe->score = $score; // Attach the score to the recipe object

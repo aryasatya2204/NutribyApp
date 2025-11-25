@@ -15,6 +15,9 @@ class ChildGrowthHistory extends Model
         'weight',
         'height',
         'nutritional_status_hfa',
+        'z_score_wfa',
+        'z_score_hfa',
+        'z_score_wfh',
         'recommended_budget_at_the_time',
     ];
 

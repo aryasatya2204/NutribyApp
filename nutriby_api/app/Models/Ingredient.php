@@ -14,6 +14,10 @@ class Ingredient extends Model
         'category',
         'description',
         'image_url',
+        'unit',                 
+        'iron_mg',              
+        'zinc_mg',              
+        'is_allergen_high_risk' 
     ];
 
     public function recipes()

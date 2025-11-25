@@ -174,6 +174,9 @@ class ChildController extends Controller
             'weight' => $child->current_weight,
             'height' => $child->current_height,
             'nutritional_status_hfa' => $child->nutritional_status_hfa,
+            'z_score_wfa' => $statusResult['z_score_wfa_value'] ?? null,
+            'z_score_hfa' => $statusResult['z_score_hfa_value'] ?? null,
+            'z_score_wfh' => $statusResult['z_score_wfh_value'] ?? null,
             'recommended_budget_at_the_time' => $child->budget_max,
         ]);
     }

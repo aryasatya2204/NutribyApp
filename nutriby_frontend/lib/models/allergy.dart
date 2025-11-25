@@ -11,8 +11,8 @@ class Allergy {
   String? get fullImageUrl {
     if (imageUrl == null || imageUrl!.isEmpty) return null;
     // Ganti '10.0.2.2:8000' jika base URL server Anda berbeda
-    // return 'http://10.0.2.2:8000/storage/$imageUrl';
-    return 'http://192.168.213.209:8000/storage/$imageUrl';
+    return 'http://10.0.2.2:8000/storage/$imageUrl';
+    // return 'http://192.168.213.209:8000/storage/$imageUrl';
   }
 
   Allergy({

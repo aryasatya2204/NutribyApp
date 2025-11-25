@@ -22,6 +22,9 @@ class Recipe extends Model
         'calories',
         'protein_grams',
         'fat_grams',
+        'nutrition_focus', 
+        'iron_total_mg',  
+        'zinc_total_mg',   
     ];
 
     public function ingredients()

@@ -48,6 +48,9 @@ class NutritionalStatusService
             'status_hfa' => $statusHfa,
             'status_wfa' => $statusWfa,
             'status_wfh' => $statusWfh,
+            'z_score_hfa_value' => $zScoreHfa, 
+            'z_score_wfa_value' => $zScoreWfa, 
+            'z_score_wfh_value' => $zScoreWfh,
             'notes' => $notes,
         ];
     }

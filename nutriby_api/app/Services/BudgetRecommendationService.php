@@ -83,15 +83,40 @@ class BudgetRecommendationService
         // Score the eligible recipes based on soft constraints (preferences, needs).
         return $eligibleRecipes->map(function ($recipe) use ($child, $favoriteIngredientIds) {
             $score = 0;
+
+            // 1. Priority: Favorite ingredients
             if ($recipe->ingredients->whereIn('id', $favoriteIngredientIds)->isNotEmpty()) {
                 $score += 10; // Priority for favorite foods
             }
-            if (str_contains($child->nutritional_status_hfa, 'Stunting') && $recipe->protein_grams > 10) {
-                $score += 15; // High priority for high-protein if stunted
+
+            // 2. Priority: Stunting (Height-for-Age) -> NEEDS ZINC & IRON
+            // UPDATED LOGIC: Prioritaskan Zinc & Iron untuk Stunting
+            if (str_contains($child->nutritional_status_hfa, 'Stunting')) {
+                // Level 1 (Terbaik): Resep yang memang didesain untuk peninggi badan
+                if ($recipe->nutrition_focus === 'height_booster') {
+                    $score += 25; 
+                }
+                // Level 2 (Sangat Baik): Kandungan Zinc tinggi (> 2mg per porsi)
+                elseif ($recipe->zinc_total_mg >= 2) {
+                    $score += 20;
+                }
+                // Level 3 (Baik): Kandungan Protein tinggi
+                elseif ($recipe->protein_grams > 10) {
+                    $score += 10; 
+                }
             }
-            if (str_contains($child->nutritional_status_wfh, 'Kurus') && $recipe->calories > 150) {
-                $score += 12; // High priority for high-calorie if underweight
+
+            // 3. Priority: Underweight (Weight-for-Height) -> NEEDS CALORIES
+            // UPDATED LOGIC: Prioritaskan 'weight_booster' atau kalori tinggi
+            if (str_contains($child->nutritional_status_wfh, 'Kurus') || str_contains($child->nutritional_status_wfh, 'Buruk')) {
+                if ($recipe->nutrition_focus === 'weight_booster') {
+                    $score += 25;
+                }
+                elseif ($recipe->calories > 150) {
+                    $score += 12; // High priority for high-calorie if underweight
+                }
             }
+
             $recipe->score = $score;
             return $recipe;
         })
