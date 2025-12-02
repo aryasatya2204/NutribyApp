@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Child;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Services\NutritionalStatusService;
 use App\Services\BudgetRecommendationService;
@@ -27,124 +28,141 @@ class ChildController extends Controller
      */
     public function index(Request $request)
     {
-        $children = $request->user()->children()->with(['allergies', 'favoriteIngredients'])->get();
+        $children = $request->user()->children()->with(['allergies', 'favoriteIngredients', 'growthHistories'])->get();
         return response()->json($children);
     }
 
     /**
      * Store a newly created child in storage.
      */
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'birth_date' => 'required|date',
-            'gender' => 'required|in:male,female',
-            'current_weight' => 'required|numeric|min:1',
-            'current_height' => 'required|numeric|min:20',
-            'parent_monthly_income' => 'required|integer|min:0',
-
-            // Validasi untuk input alergi dan kesukaan
-            'allergy_ids' => 'sometimes|array',
-            'allergy_ids.*' => 'integer|exists:ingredients,id',
-            'favorite_ids' => 'sometimes|array',
-            'favorite_ids.*' => 'integer|exists:ingredients,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        // Gunakan DB Transaction untuk memastikan semua data berhasil disimpan
-        $child = DB::transaction(function () use ($request) {
-            // 1. Buat data anak seperti biasa
-            $child = $request->user()->children()->create($request->except(['allergy_ids', 'favorite_ids']));
-
-            // 2. Simpan relasi alergi jika ada
-            if ($request->has('allergy_ids')) {
-                $child->allergies()->attach($request->allergy_ids);
-            }
-
-            // 3. Simpan relasi makanan kesukaan jika ada
-            if ($request->has('favorite_ids')) {
-                $child->favoriteIngredients()->attach($request->favorite_ids);
-            }
-
-            return $child;
-        });
-
-        // 4. Jalankan engine cerdas kita setelah semuanya tersimpan
-        $this->processChildData($child);
-
-        // Muat ulang relasi agar tampil di response
-        $child->load(['allergies', 'favoriteIngredients']);
-
-        return response()->json($child, 201);
-    }
-
-    /**
-     * Display the specified child.
-     */
-    public function show(Request $request, Child $child)
-    {
-        // Authorization: ensure the user can only see their own child's data.
-        if ($request->user()->id !== $child->user_id) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-        return response()->json($child);
-    }
-
-    /**
-     * Update the specified child in storage.
-     */
     public function update(Request $request, Child $child)
     {
-        // 1. Otorisasi: Pastikan user hanya bisa update data anaknya sendiri
-        if ($request->user()->id !== $child->user_id) {
-            return response()->json(['message' => 'Forbidden'], 403);
+        // Validasi ownership
+        if ($child->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
         }
 
-        // 2. Validasi Fleksibel: Gunakan 'sometimes' agar field tidak wajib ada semua
-        $validator = Validator::make($request->all(), [
-            // Validasi data inti (jika dikirim)
-            'current_weight' => 'sometimes|required|numeric|min:1',
-            'current_height' => 'sometimes|required|numeric|min:20',
-            'parent_monthly_income' => 'sometimes|required|integer|min:0',
-
-            // Validasi data preferensi (jika dikirim)
+        // Validasi input
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'birth_date' => 'sometimes|date',
+            'gender' => 'sometimes|in:male,female',
+            'current_weight' => 'sometimes|numeric|min:0',
+            'current_height' => 'sometimes|numeric|min:0',
+            'parent_monthly_income' => 'sometimes|integer|min:0',
+            
+            // ✅ FIXED: Sekarang pakai allergy_ids (array of allergy IDs)
             'allergy_ids' => 'sometimes|array',
-            'allergy_ids.*' => 'integer|exists:ingredients,id',
+            'allergy_ids.*' => 'integer|exists:allergies,id',
+            
+            // ✅ TETAP: Favorite tetap pakai ingredient_ids
             'favorite_ids' => 'sometimes|array',
             'favorite_ids.*' => 'integer|exists:ingredients,id',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // Update core data
+        $child->update($validated);
+
+        // ✅ FIXED: Sync allergies (grup alergi)
+        if ($request->has('allergy_ids')) {
+            $child->allergies()->sync($request->allergy_ids);
         }
 
-        // Gunakan transaction untuk keamanan data
-        DB::transaction(function () use ($request, $child) {
-            // 3. Update Data Inti (jika ada dalam request)
-            if ($request->has(['current_weight', 'current_height', 'parent_monthly_income'])) {
-                $child->update($request->only(['current_weight', 'current_height', 'parent_monthly_income']));
-                // Jalankan ulang service cerdas jika data inti berubah
-                $this->processChildData($child);
-            }
+        // ✅ TETAP: Sync favorite ingredients
+        if ($request->has('favorite_ids')) {
+            $child->favoriteIngredients()->sync($request->favorite_ids);
+        }
 
-            // 4. Update Alergi (jika ada dalam request)
-            if ($request->has('allergy_ids')) {
-                // 'sync' akan menghapus yang lama dan menambah yang baru. Sempurna untuk update.
-                $child->allergies()->sync($request->allergy_ids);
-            }
+        // Load relasi untuk response
+        $child->load(['allergies.ingredients', 'favoriteIngredients']);
 
-            // 5. Update Makanan Kesukaan (jika ada dalam request)
-            if ($request->has('favorite_ids')) {
-                $child->favoriteIngredients()->sync($request->favorite_ids);
-            }
-        });
+        return response()->json([
+            'message' => 'Child updated successfully',
+            'child' => $child
+        ]);
+    }
 
-        // 6. Kembalikan data anak yang sudah ter-update, termasuk relasi terbarunya
-        return response()->json($child->load(['allergies', 'favoriteIngredients']));
+    /**
+     * Store a new child
+     * 
+     * ✅ FIXED: Sekarang menerima allergy_ids
+     */
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'birth_date' => 'required|date',
+        'gender' => 'required|in:male,female',
+        'current_weight' => 'required|numeric|min:0',
+        'current_height' => 'required|numeric|min:0',
+        'parent_monthly_income' => 'required|min:0', // ✅ FIX: Hapus type 'integer'
+        
+        'allergy_ids' => 'sometimes|array',
+        'allergy_ids.*' => 'integer|exists:allergies,id',
+        
+        'favorite_ids' => 'sometimes|array',
+        'favorite_ids.*' => 'integer|exists:ingredients,id',
+    ]);
+
+    // ✅ FIX: Clean dan cast parent_monthly_income ke integer
+    $cleanedData = [
+        'name' => $validated['name'],
+        'birth_date' => $validated['birth_date'],
+        'gender' => $validated['gender'],
+        'current_weight' => (float) $validated['current_weight'],
+        'current_height' => (float) $validated['current_height'],
+        'parent_monthly_income' => (int) filter_var(
+            $validated['parent_monthly_income'], 
+            FILTER_SANITIZE_NUMBER_INT
+        ),
+    ];
+
+    // Create child dengan data yang sudah bersih
+    $child = $request->user()->children()->create($cleanedData);
+
+    // Attach allergies
+    if ($request->has('allergy_ids')) {
+        $child->allergies()->attach($request->allergy_ids);
+    }
+
+    // Attach favorites
+    if ($request->has('favorite_ids')) {
+        $child->favoriteIngredients()->attach($request->favorite_ids);
+    }
+
+    // Process nutritional status & budget
+    $this->processChildData($child);
+
+    // Load relasi
+    $child->load(['allergies.ingredients', 'favoriteIngredients', 'growthHistories']);
+
+    return response()->json($child, 201);
+}
+
+    /**
+     * Show child details
+     * 
+     * ✅ UPDATED: Load allergies dengan ingredients-nya
+     */
+    public function show(Child $child)
+    {
+        // Validasi ownership
+        if ($child->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // Load semua relasi yang dibutuhkan
+        $child->load([
+            'allergies.ingredients', // Load grup alergi + bahan pemicu
+            'favoriteIngredients',
+            'growthHistories'
+        ]);
+
+        return response()->json($child);
     }
 
     /**

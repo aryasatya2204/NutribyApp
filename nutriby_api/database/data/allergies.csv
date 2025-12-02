@@ -1,0 +1,23 @@
+﻿No;Nama Alergi;Tipe;Bahan Pemicu (Trigger Ingredients);Gejala Utama;Penanganan Medis;Image URL
+8;Alergi Wijen;Individual;Minyak Wijen, Biji Wijen;Bengkak wajah, sesak napas, biduran luas.;Stop konsumsi. Wijen adalah alergen mayor. Cek bumbu masakan Asia/Jepang.;allergies/sesame_allergy.jpg
+9;Alergi Tomat;Individual;Tomat;Ruam merah di sekitar mulut, pantat perih (ruam popok).;Masak tomat hingga matang sempurna. Gunakan krim pelindung di mulut/pantat.;allergies/tomato_allergy.jpg
+10;Alergi Jagung;Individual;Jagung Manis, Tepung Maizena;Diare, muntah, gatal-gatal.;Hindari jagung dan olahannya (sirup jagung, maizena). Ganti dengan Kentang/Ubi.;allergies/corn_allergy.jpg
+11;Alergi Ayam;Individual;Daging Ayam;Muntah hebat berulang (FPIES), diare 2-4 jam setelah makan.;Ganti protein hewani dengan Daging Sapi atau Ikan.;allergies/chicken_meat_allergy.jpg
+12;Alergi Jamur;Individual;Jamur Champignon, Kaldu Jamur;Gatal, kembung, bengkak bibir.;Hindari jamur & penyedap rasa kaldu jamur.;allergies/mushroom_allergy.jpg
+13;Alergi Pisang;Individual;Pisang Ambon;Gatal di langit-langit mulut, biduran.;Hindari pisang mentah. Coba pisang kukus/panggang (kadang lebih aman).;allergies/banana_allergy.jpg
+14;Alergi Seledri;Individual;Daun Seledri, Batang Seledri;Gatal mulut, bengkak tenggorokan.;Hindari penggunaan daun sop/seledri pada kuah. Ganti dengan Daun Bawang.;allergies/celery_allergy.jpg
+15;Alergi Bayam;Individual;Daun Bayam;Gatal sekitar mulut (histamin), ruam merah.;Masak bayam sekali habis (jangan dipanaskan ulang). Ganti dengan Brokoli/Sawi.;allergies/spinach_allergy.jpg
+16;Alergi Tauge;Individual;Tauge (Kecambah);Sakit perut, diare (risiko bakteri).;Pastikan tauge dimasak sampai benar-benar matang. Jangan berikan mentah.;allergies/sprout_allergy.jpg
+17;Alergi MSG;Individual;Kaldu Bubuk, Saos Tiram, Kecap Asin;Wajah memerah, rewel/sakit kepala, haus.;Ganti dengan Kaldu Tulang Alami (Bone Broth) dan bumbu aromatik alami.;allergies/msg_allergy.jpg
+18;Alergi Stroberi;Individual;Buah Stroberi;Biduran, ruam merah di kulit.;Kenalkan sedikit-sedikit. Lebih aman jika dimasak (selai/saus) daripada mentah.;allergies/strawberry_allergy.jpg
+19;Alergi Santan;Individual;Santan (Kelapa);Mual, muntah, diare, eksim memburuk.;Ganti kuah gurih dengan Susu UHT (jika aman) atau Kaldu Kental.;allergies/coconut_allergy.jpg
+20;Alergi Cokelat;Individual;Cokelat Bubuk, Choco Chip;Gelisah (kafein), gatal kulit.;Tunda pemberian cokelat hingga usia 12 bulan+. Ganti dengan Tepung Carob.;allergies/chocolate_allergy.jpg
+;;;;;;
+No;Nama Alergi;Tipe;Bahan Pemicu (Trigger Ingredients);Gejala Utama;Penanganan Medis;Image URL
+1;Alergi Telur;Group;Telur Ayam, Telur Puyuh, Telur Bebek, Telur;Biduran (urtikaria), bengkak kelopak mata, muntah segera setelah makan.;Hindari semua produk telur & olahannya (roti, mayones). Cek label makanan kemasan.;allergies/egg_allergy.jpg
+2;Alergi Susu Sapi;Group;Susu UHT, Keju, Butter, Yoghurt, Margarin, Susu Bubuk;Diare berdarah, eksim kulit parah, kolik/sakit perut, muntah.;Ganti dengan ASI, Susu Soya (jika cocok), atau Santan. Hindari produk dairy total.;allergies/dairy_allergy.jpg
+3;Alergi Seafood;Group;Udang, Cumi, Kepiting, Lobster;Bengkak wajah (angioedema), sesak napas, gatal hebat.;Stop konsumsi total. Hindari terasi & kerupuk udang. Bawa ke IGD jika sesak.;allergies/seafood_allergy.jpg
+4;Alergi Ikan;Group;Ikan Salmon, Tuna, Kembung, Lele, Patin, Dori, Teri;Gatal di mulut, biduran, sesak napas.;Hindari jenis ikan pemicu. Coba ikan air tawar dengan hati-hati (struktur protein beda).;allergies/fish_allergy.jpg
+5;Alergi Kedelai;Group;Tahu, Tempe, Tofu, Edamame, Kecap Manis, Susu Kedelai;Kembung, diare, gatal-gatal ringan, eksim.;Ganti protein nabati dengan Kacang Hijau/Merah. Hindari kecap berbahan kedelai.;allergies/soy_allergy.jpg
+6;Alergi Gandum;Group;Roti Tawar, Makaroni, Tepung Terigu, Oat, Tepung Panir;Hidung tersumbat, kram perut, gatal kulit.;Ganti karbohidrat dengan Beras, Kentang, Ubi, atau Jagung (Bebas Gluten).;allergies/wheat_allergy.jpg
+7;Alergi Kacang;Group;Kacang Hijau, Kacang Merah, Kacang Tanah, Selai Kacang;Gatal tenggorokan, sesak napas (bisa fatal/anafilaksis).;"Hindari semua produk kacang. Cek label ""may contain nuts"" pada biskuit bayi.";allergies/nut_allergy.jpg

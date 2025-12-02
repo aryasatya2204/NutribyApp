@@ -102,9 +102,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _handleStep2(Map<String, dynamic> data) async {
     if (!_step2Key.currentState!.validate()) return;
 
-    data['parent_monthly_income'] =
-        int.tryParse(data['parent_monthly_income'].replaceAll('.', '')) ?? 0;
-    _registrationData.addAll(data);
+    final cleanedData = {
+      'name': data['name'],
+      'birth_date': data['birth_date'],
+      'gender': data['gender'],
+      'current_weight': data['current_weight'] ?? 0.0,
+      'current_height': data['current_height'] ?? 0.0,
+      'parent_monthly_income': int.tryParse(
+          (data['parent_monthly_income'] ?? '0').toString().replaceAll('.', '').replaceAll(',', '')
+      ) ?? 0,
+    };
+
+    _registrationData.addAll(cleanedData);
 
     showDialog(
       context: context,

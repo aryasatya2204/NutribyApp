@@ -154,12 +154,12 @@ Route::middleware('auth:sanctum')->group(function () {
      */
     Route::get('/allergies', [AllergyController::class, 'index']);
 
-     /**
-      * @route GET /api/allergies/search
-      * @description Search allergy facts by name, symptom, or related ingredient.
-      * @controller AllergyController@search
-      */
-     Route::get('/allergies/search', [AllergyController::class, 'search']);
+    /**
+     * @route GET /api/allergies/search
+     * @description Search allergy facts by name, symptom, or related ingredient.
+     * @controller AllergyController@search
+     */
+    Route::get('/allergies/search', [AllergyController::class, 'search']);
 
     /**
      * @route GET /api/allergies/{allergy}
@@ -172,10 +172,23 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- Core Features ---
 
     /**
+     * @route GET /api/children/{child}/weekly-plan/active
+     * @description Get the active weekly plan for a specific child.
+     * @controller WeeklyPlanController@getActive
+     */
+    Route::get('/children/{child}/weekly-plan/active', [WeeklyPlanController::class, 'getActive'])->where('child', '[0-9]+');
+
+    /**
      * @route POST /api/children/{child}/weekly-plan/generate
      * @description Generate a new weekly meal plan for a specific child.
      * @controller WeeklyPlanController@generate
      */
     Route::post('/children/{child}/weekly-plan/generate', [WeeklyPlanController::class, 'generate'])->where('child', '[0-9]+');
 
+    /**
+     * @route POST /api/children/{child}/weekly-plan/generate
+     * @description Generate a new weekly meal plan for a specific child.
+     * @controller WeeklyPlanController@generate
+     */
+    Route::post('/children/{child}/weekly-plan/generate', [WeeklyPlanController::class, 'generate'])->where('child', '[0-9]+');
 }); // End of auth:sanctum group

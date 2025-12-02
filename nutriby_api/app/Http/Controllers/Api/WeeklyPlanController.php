@@ -19,6 +19,36 @@ class WeeklyPlanController extends Controller
     }
 
     /**
+     * Get the active weekly plan for a child.
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Child  $child
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getActive(Request $request, Child $child)
+    {
+        // 1. Authorization: Ensure the logged-in user owns this child record.
+        if ($request->user()->id !== $child->user_id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        // 2. Find the most recent active weekly plan
+        $activePlan = $child->weeklyPlans()
+            ->where('is_active', true)
+            ->where('end_date', '>=', now()->toDateString()) // Plan masih berlaku
+            ->latest('created_at')
+            ->first();
+
+        // 3. If no active plan found, return 404
+        if (!$activePlan) {
+            return response()->json(['message' => 'No active weekly plan found'], 404);
+        }
+
+        // 4. Return the active plan with all details and ingredients
+        return response()->json($activePlan->load('details.recipe.ingredients'), 200);
+    }
+
+    /**
      * Generate and store a new weekly plan for a child.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -47,24 +77,33 @@ class WeeklyPlanController extends Controller
 
             // 4. Store the Plan: Use a database transaction for data integrity.
             $plan = DB::transaction(function () use ($child, $recipes) {
-                // Step A: Create the master plan record.
+                // ✅ TAMBAHAN: Nonaktifkan semua plan lama
+                $child->weeklyPlans()->update(['is_active' => false]);
+                
+                $recipes = $recipes->values(); 
+                
                 $weeklyPlan = $child->weeklyPlans()->create([
                     'name' => 'Rencana Minggu ' . now()->weekOfYear . ', ' . now()->year,
                     'start_date' => now()->startOfWeek(),
                     'end_date' => now()->endOfWeek(),
+                    'is_active' => true, // ✅ Set plan baru sebagai aktif
                 ]);
 
-                // Step B: Create the 21 detail records.
-                $recipeIterator = $recipes->getIterator();
+                $recipeIndex = 0;
+                
                 for ($day = 1; $day <= 7; $day++) {
                     foreach (['pagi', 'siang', 'sore'] as $meal) {
-                        $recipe = $recipeIterator->current();
-                        $weeklyPlan->details()->create([
-                            'recipe_id' => $recipe->id,
-                            'day_of_week' => $day,
-                            'meal_type' => $meal,
-                        ]);
-                        $recipeIterator->next();
+                        if (isset($recipes[$recipeIndex])) {
+                            $recipe = $recipes[$recipeIndex];
+                            
+                            $weeklyPlan->details()->create([
+                                'recipe_id' => $recipe->id,
+                                'day_of_week' => $day,
+                                'meal_type' => $meal,
+                            ]);
+                            
+                            $recipeIndex++;
+                        }
                     }
                 }
                 
@@ -72,10 +111,9 @@ class WeeklyPlanController extends Controller
             });
 
             // 5. Return the Result: Send the newly created plan back to the app.
-            return response()->json($plan->load('details.recipe'), 201);
+            return response()->json($plan->load('details.recipe.ingredients'), 201);
 
         } catch (\Exception $e) {
-            // Log the error for debugging and return a generic server error.
             Log::error('Failed to generate weekly plan: ' . $e->getMessage());
             return response()->json(['message' => 'Terjadi kesalahan pada server saat membuat rencana.'], 500);
         }

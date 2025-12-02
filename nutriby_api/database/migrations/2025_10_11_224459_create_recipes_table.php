@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('instructions');
             $table->string('image_url')->nullable();
             $table->unsignedTinyInteger('min_age_months');
-            $table->enum('texture', ['puree', 'mashed', 'soft_chunks', 'finger_food']);
+            $table->enum('texture', ['puree', 'mashed', 'soft_chunks', 'finger_food', 'family_food']);
             $table->unsignedInteger('estimated_cost');
             $table->string('serving_size');
             $table->unsignedInteger('calories')->nullable();

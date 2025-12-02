@@ -89,7 +89,10 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: _buildSafeImage(ingredient.fullImageUrl),
+          child: _buildSafeImage(
+              allergy.fullImageUrl ??
+                  (allergy.ingredients.isNotEmpty ? allergy.ingredients.first.fullImageUrl : null)
+          ),
         ),
         title: Text(ingredient.name, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(allergy.name),
@@ -131,13 +134,17 @@ class _AllergyFactsScreenState extends State<AllergyFactsScreen> {
             const Divider(),
             const SizedBox(height: 8),
             Wrap(
-              spacing: 12.0,
-              runSpacing: 8.0,
+              spacing: 8.0,
+              runSpacing: 6.0,
               children: allergy.ingredients.map((ingredient) {
+                // Perbaikan: Hapus avatar/gambar, hanya tampilkan text
                 return Chip(
-                  avatar: ClipOval(child: _buildSafeImage(ingredient.fullImageUrl)), // Gunakan fullImageUrl
-                  label: Text(ingredient.name),
+                  label: Text(
+                    ingredient.name,
+                    style: const TextStyle(color: Color(0xFF333333)),
+                  ),
                   backgroundColor: Colors.grey[100],
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 );
               }).toList(),
             ),

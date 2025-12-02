@@ -14,7 +14,7 @@ use Illuminate\Support\Collection;
  */
 class WeeklyPlanService
 {
-    private const MEALS_PER_WEEK = 21; 
+    private const MEALS_PER_WEEK = 21;
 
     /**
      * The main method to generate a weekly plan for a specific child.
@@ -27,19 +27,24 @@ class WeeklyPlanService
     {
         // 1. Determine Parameters
         $ageInMonths = $child->birth_date->diffInMonths(now());
-        $allergyIngredientIds = $child->allergies()->pluck('ingredients.id');
-        $favoriteIngredientIds = $child->favoriteIngredients()->pluck('ingredients.id');
-        $nutritionalStatus = $child->nutritional_status_hfa;
 
-        $monthlyBudget = $options['budget'] ?? $child->recommended_budget;
-        $dailyBudget = $monthlyBudget / 4.2 / 7;
+        // ✅ FIX: Ambil allergy ingredient IDs dengan benar
+        $allergyIngredientIds = $child->getAllergenIngredientIds();
+
+        // ✅ FIX: Deklarasi variabel favoriteIngredientIds yang hilang
+        $favoriteIngredientIds = $child->favoriteIngredients()->pluck('ingredients.id');
+        $favoriteIngredientIdsArray = $favoriteIngredientIds->toArray();
+
+        $nutritionalStatus = $child->nutritional_status_hfa ?? '';
+
+        // ✅ FIX: Gunakan budgetMax jika tidak ada recommended_budget
+        $monthlyBudget = $options['budget'] ?? $child->budget_max ?? 0;
+        $dailyBudget = $monthlyBudget > 0 ? $monthlyBudget / 4.2 / 7 : 999999;
 
         // 2. Build the Base Query (Filtering)
-        // Start by getting a pool of all potentially suitable recipes.
         $eligibleRecipes = Recipe::query()
             // Rule: Must be appropriate for the child's age.
             ->where('min_age_months', '<=', $ageInMonths)
-
             ->where(function ($query) use ($ageInMonths) {
                 $query->whereNull('max_age_months')
                     ->orWhere('max_age_months', '>=', $ageInMonths);
@@ -50,65 +55,55 @@ class WeeklyPlanService
 
             // Rule: Must NOT contain any ingredients the child is allergic to.
             ->whereDoesntHave('ingredients', function ($query) use ($allergyIngredientIds) {
-                $query->whereIn('ingredients.id', $allergyIngredientIds);
+                if (!empty($allergyIngredientIds)) {
+                    $query->whereIn('ingredients.id', $allergyIngredientIds);
+                }
             })
             ->with('ingredients') // Eager load ingredients for scoring
             ->get();
 
         // Handle case where not enough recipes are found
         if ($eligibleRecipes->count() < self::MEALS_PER_WEEK) {
-            // In a real app, you'd throw a custom exception here to give a nice error message.
-            // For now, we return what we can find.
             return $eligibleRecipes->shuffle()->take(self::MEALS_PER_WEEK);
         }
 
         // 3. Score Each Recipe (Prioritization)
-        // This is where the "AI-like" logic happens.
-        $scoredRecipes = $eligibleRecipes->map(function ($recipe) use ($nutritionalStatus, $favoriteIngredientIds) {
+        $scoredRecipes = $eligibleRecipes->map(function ($recipe) use ($nutritionalStatus, $favoriteIngredientIdsArray) {
             $score = 0;
 
             // Priority: Boost recipes containing favorite ingredients.
-            $favoriteCount = $recipe->ingredients->whereIn('id', $favoriteIngredientIds)->count();
-            $score += $favoriteCount * 5; // Add 5 points for each favorite ingredient
+            $favoriteCount = $recipe->ingredients->whereIn('id', $favoriteIngredientIdsArray)->count();
+            $score += $favoriteCount * 5;
 
             // Priority: If stunting, boost recipes with high protein.
             if (str_contains($nutritionalStatus, 'Stunting')) {
-                // Fokus utama: Resep yang dilabeli 'height_booster' (Peninggi Badan)
                 if ($recipe->nutrition_focus === 'height_booster') {
-                    $score += 25; // Prioritas Tertinggi!
-                }
-                // Backup: Jika tidak ada label, cari yang Zinc-nya tinggi (> 2mg per porsi)
-                elseif ($recipe->zinc_total_mg >= 2) {
+                    $score += 25;
+                } elseif ($recipe->zinc_total_mg >= 2) {
                     $score += 20;
-                }
-                // Backup 2: Protein tetap dihargai
-                elseif ($recipe->protein_grams > 10) {
+                } elseif ($recipe->protein_grams > 10) {
                     $score += 10;
                 }
             }
 
-            // Priority: If underweight (kurus), boost high-calorie recipes.
+            // Priority: If underweight, boost high-calorie recipes.
             if (str_contains($nutritionalStatus, 'Kurang') || str_contains($nutritionalStatus, 'Buruk')) {
-                // Prioritas 1: Resep khusus penambah berat badan
                 if ($recipe->nutrition_focus === 'weight_booster') {
-                    $score += 25; 
-                }
-                // Prioritas 2: Kalori tinggi (> 150 kkal)
-                elseif ($recipe->calories > 150) {
+                    $score += 25;
+                } elseif ($recipe->calories > 150) {
                     $score += 12;
                 }
             }
 
-            $recipe->score = $score; // Attach the score to the recipe object
+            $recipe->score = $score;
             return $recipe;
         });
 
         // 4. Select the Final 21 Recipes
-        // Sort by score descending, take the top ~40 recipes for variety,
-        // then randomly pick 21 from that top tier.
         return $scoredRecipes->sortByDesc('score')
-            ->take(40) // Take a larger pool of high-scoring recipes
-            ->shuffle() // Shuffle to ensure variety each week
-            ->take(self::MEALS_PER_WEEK); // Select the final 21
+            ->take(40)
+            ->shuffle()
+            ->take(self::MEALS_PER_WEEK)
+            ->values();
     }
 }

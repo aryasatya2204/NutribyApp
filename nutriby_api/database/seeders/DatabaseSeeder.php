@@ -12,9 +12,8 @@ class DatabaseSeeder extends Seeder
     {
         // Urutan ini sangat penting!
         $this->call([
-            IngredientSeeder::class,      // 1. Buat "kamus" bahan dulu
-            RecipeSeeder::class,          // 2. Buat resep menggunakan bahan yang ada
-            AllergySeeder::class,         // 3. Buat data alergi menggunakan bahan yang ada
+            RecipeSeeder::class,
+            AllergySeeder::class,
             GrowthStandardSeeder::class,
         ]);
         

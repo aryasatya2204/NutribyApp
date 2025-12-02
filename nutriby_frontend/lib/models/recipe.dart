@@ -13,13 +13,16 @@ class Recipe {
   final int? calories;
   final double? proteinGrams;
   final double? fatGrams;
+  final double? ironTotalMg;   
+  final double? zincTotalMg;   
+  final String? nutritionFocus;
   final List<IngredientPivot> ingredients;
 
   String? get fullImageUrl {
     if (imageUrl == null || imageUrl!.isEmpty) return null;
     // Sesuaikan base URL
-    return 'http://10.0.2.2:8000/storage/$imageUrl';
-    // return 'http://192.168.213.209:8000/storage/$imageUrl';
+    // return 'http://10.0.2.2:8000/storage/$imageUrl';
+    return 'http://192.168.1.5:8000/$imageUrl';
   }
 
   Recipe({
@@ -35,6 +38,9 @@ class Recipe {
     this.calories,
     this.proteinGrams,
     this.fatGrams,
+    this.ironTotalMg,
+    this.zincTotalMg,
+    this.nutritionFocus,
     this.ingredients = const [],
   });
 
@@ -73,6 +79,9 @@ class Recipe {
       calories: parseInt(json['calories']),
       proteinGrams: parseDouble(json['protein_grams']),
       fatGrams: parseDouble(json['fat_grams']),
+      ironTotalMg: parseDouble(json['iron_total_mg']), 
+      zincTotalMg: parseDouble(json['zinc_total_mg']), 
+      nutritionFocus: json['nutrition_focus'],
       ingredients: parsedIngredients,
     );
   }

@@ -11,9 +11,11 @@ class Allergy extends Model
 
     protected $fillable = [
         'ingredient_id',
+        'type',
         'name',
         'symptoms',
         'handling_and_prevention',
+        'image_url',
     ];
 
     /**

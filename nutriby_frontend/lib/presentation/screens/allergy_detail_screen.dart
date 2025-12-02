@@ -18,8 +18,9 @@ class AllergyDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xFFC70039);
 
-    final String? displayImageUrl = allergy.imageUrl ??
-        (allergy.ingredients.isNotEmpty ? allergy.ingredients.first.imageUrl : null);
+    // Perbaikan: Gunakan fullImageUrl untuk mendapatkan URL lengkap
+    final String? displayImageUrl = allergy.fullImageUrl ??
+        (allergy.ingredients.isNotEmpty ? allergy.ingredients.first.fullImageUrl : null);
 
     return Scaffold(
       backgroundColor: Colors.white,

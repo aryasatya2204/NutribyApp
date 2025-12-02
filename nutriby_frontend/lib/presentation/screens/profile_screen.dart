@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:nutriby_frontend/models/child.dart';
 import 'package:nutriby_frontend/models/ingredient.dart';
+import 'package:nutriby_frontend/models/allergy.dart';
 import 'package:nutriby_frontend/models/user_model.dart';
 import 'package:nutriby_frontend/services/auth_service.dart';
 import 'package:nutriby_frontend/services/child_service.dart';
@@ -111,9 +112,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final budgetRecommendation =
               '${currencyFormatter.format(child.budgetMin ?? 0)} - ${currencyFormatter.format(child.budgetMax ?? 0)}';
 
+          // Helper untuk menampilkan list ingredient
           String ingredientsToString(List<Ingredient> ingredients) {
             if (ingredients.isEmpty) return 'Belum diisi';
             return ingredients.map((e) => e.name).join(', ');
+          }
+
+          // ✅ FIX: Helper untuk menampilkan list allergy
+          String allergiesToString(List<Allergy> allergies) {
+            if (allergies.isEmpty) return 'Belum diisi';
+            return allergies.map((e) => e.name).join(', ');
           }
 
           return RefreshIndicator(
@@ -132,7 +140,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ]),
                 _buildSectionTitle('Preferensi Makanan'),
                 _buildInfoCard(children: [
-                  _buildPermanentInfoTile('Alergi', ingredientsToString(child.allergies), Icons.block),
+                  // ✅ Gunakan allergiesToString
+                  _buildPermanentInfoTile('Alergi', allergiesToString(child.allergies), Icons.block),
                   _buildPermanentInfoTile('Makanan Kesukaan', ingredientsToString(child.favoriteIngredients), Icons.favorite_border),
                 ]),
                 _buildSectionTitle('Status & Rekomendasi'),
@@ -235,11 +244,12 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   late TextEditingController _heightController;
   late TextEditingController _incomeController;
 
-  late Set<Ingredient> _selectedAllergies;
-  late Set<Ingredient> _selectedFavorites;
+  Set<Allergy> _selectedAllergies = {};
+  Set<Ingredient> _selectedFavorites = {};
 
+  List<Allergy> _allAllergies = [];
   List<Ingredient> _allIngredients = [];
-  bool _isLoadingIngredients = true;
+  bool _isLoadingData = true;
   bool _isSaving = false;
 
   @override
@@ -248,9 +258,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     _weightController = TextEditingController(text: widget.child.currentWeight.toStringAsFixed(1));
     _heightController = TextEditingController(text: widget.child.currentHeight.toStringAsFixed(1));
     _incomeController = TextEditingController(text: NumberFormat.decimalPattern('id_ID').format(widget.child.parentMonthlyIncome));
-    _selectedAllergies = widget.child.allergies.toSet();
+
     _selectedFavorites = widget.child.favoriteIngredients.toSet();
-    _fetchIngredients();
+
+    _fetchData();
   }
 
   @override
@@ -261,18 +272,30 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     super.dispose();
   }
 
-  Future<void> _fetchIngredients() async {
+  Future<void> _fetchData() async {
     try {
-      final ingredients = await DataService().getIngredients();
+      final results = await Future.wait([
+        DataService().getAllergies(),
+        DataService().getIngredients(cleanOnly: true),
+      ]);
+
       if (mounted) {
         setState(() {
-          _allIngredients = ingredients;
-          _isLoadingIngredients = false;
+          _allAllergies = results[0] as List<Allergy>;
+          _allIngredients = results[1] as List<Ingredient>;
+
+          // ✅ FIX: Logika mapping lebih sederhana karena tipe data sudah sama
+          final childAllergyIds = widget.child.allergies.map((e) => e.id).toSet();
+          _selectedAllergies = _allAllergies
+              .where((a) => childAllergyIds.contains(a.id))
+              .toSet();
+
+          _isLoadingData = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal memuat bahan: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal memuat data: $e')));
       }
     }
   }
@@ -292,7 +315,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
       );
 
       if (mounted) {
-        Navigator.of(context).pop(true); // Kirim 'true' untuk menandakan sukses
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
@@ -305,41 +328,34 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     }
   }
 
-  Future<void> _showMultiSelectDialog({
-    required String title,
-    required Set<Ingredient> currentSelections,
-    required Set<Ingredient> disabledSelections,
-    required Function(Set<Ingredient>) onConfirm,
-  }) async {
-    final Set<Ingredient> tempSelections = {...currentSelections};
+  Future<void> _showAllergyDialog() async {
+    final Set<Allergy> tempSelections = {..._selectedAllergies};
 
     await showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: Text(title),
+          title: const Text('Pilih Alergi'),
           content: StatefulBuilder(
             builder: (context, setDialogState) {
-              if (_isLoadingIngredients) {
+              if (_isLoadingData) {
                 return const Center(child: CircularProgressIndicator());
               }
               return SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: _allIngredients.length,
+                  itemCount: _allAllergies.length,
                   itemBuilder: (context, index) {
-                    final item = _allIngredients[index];
+                    final item = _allAllergies[index];
                     final isSelected = tempSelections.any((i) => i.id == item.id);
-                    final isDisabled = disabledSelections.any((i) => i.id == item.id);
+                    final ingredientsText = item.ingredients.map((i) => i.name).join(', ');
 
                     return CheckboxListTile(
-                      title: Text(item.name, style: TextStyle(
-                        color: isDisabled ? Colors.grey : Colors.black,
-                        decoration: isDisabled ? TextDecoration.lineThrough : null,
-                      )),
+                      title: Text(item.name),
+                      subtitle: Text(ingredientsText, maxLines: 1, overflow: TextOverflow.ellipsis),
                       value: isSelected,
-                      onChanged: isDisabled ? null : (selected) {
+                      onChanged: (selected) {
                         setDialogState(() {
                           if (selected == true) {
                             tempSelections.add(item);
@@ -358,7 +374,14 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
             TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Batal')),
             ElevatedButton(
               onPressed: () {
-                onConfirm(tempSelections);
+                setState(() {
+                  _selectedAllergies = tempSelections;
+                  final forbiddenIds = _selectedAllergies
+                      .expand((a) => a.ingredients)
+                      .map((i) => i.id)
+                      .toSet();
+                  _selectedFavorites.removeWhere((fav) => forbiddenIds.contains(fav.id));
+                });
                 Navigator.of(ctx).pop();
               },
               child: const Text('Pilih'),
@@ -369,7 +392,74 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     );
   }
 
-  String _setToString(Set<Ingredient> aSet) {
+  Future<void> _showFavoriteDialog() async {
+    final Set<Ingredient> tempSelections = {..._selectedFavorites};
+
+    final forbiddenIds = _selectedAllergies
+        .expand((a) => a.ingredients)
+        .map((i) => i.id)
+        .toSet();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Pilih Makanan Kesukaan'),
+          content: StatefulBuilder(
+            builder: (context, setDialogState) {
+              if (_isLoadingData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return SizedBox(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _allIngredients.length,
+                  itemBuilder: (context, index) {
+                    final item = _allIngredients[index];
+                    final isSelected = tempSelections.any((i) => i.id == item.id);
+                    final isAllergic = forbiddenIds.contains(item.id);
+
+                    return CheckboxListTile(
+                      title: Text(item.name, style: TextStyle(
+                        color: isAllergic ? Colors.grey : Colors.black,
+                        decoration: isAllergic ? TextDecoration.lineThrough : null,
+                      )),
+                      subtitle: isAllergic ? const Text("Tidak bisa dipilih (Alergi)", style: TextStyle(fontSize: 10, color: Colors.red)) : null,
+                      value: isSelected,
+                      onChanged: isAllergic ? null : (selected) {
+                        setDialogState(() {
+                          if (selected == true) {
+                            tempSelections.add(item);
+                          } else {
+                            tempSelections.removeWhere((i) => i.id == item.id);
+                          }
+                        });
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Batal')),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _selectedFavorites = tempSelections;
+                });
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Pilih'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _setToString(Set<dynamic> aSet) {
     if (aSet.isEmpty) return 'Ketuk untuk memilih';
     return aSet.map((e) => e.name).join(', ');
   }
@@ -411,24 +501,14 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 title: const Text('Alergi'),
                 subtitle: Text(_setToString(_selectedAllergies)),
                 trailing: const Icon(Icons.keyboard_arrow_down),
-                onTap: () => _showMultiSelectDialog(
-                  title: 'Pilih Alergi',
-                  currentSelections: _selectedAllergies,
-                  disabledSelections: _selectedFavorites,
-                  onConfirm: (newSelection) => setState(() => _selectedAllergies = newSelection),
-                ),
+                onTap: _showAllergyDialog,
               ),
               ListTile(
                 leading: const Icon(Icons.favorite_border),
                 title: const Text('Makanan Kesukaan'),
                 subtitle: Text(_setToString(_selectedFavorites)),
                 trailing: const Icon(Icons.keyboard_arrow_down),
-                onTap: () => _showMultiSelectDialog(
-                  title: 'Pilih Makanan Kesukaan',
-                  currentSelections: _selectedFavorites,
-                  disabledSelections: _selectedAllergies,
-                  onConfirm: (newSelection) => setState(() => _selectedFavorites = newSelection),
-                ),
+                onTap: _showFavoriteDialog,
               ),
             ],
           ),

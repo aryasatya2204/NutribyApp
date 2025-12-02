@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:nutriby_frontend/models/allergy.dart';
 import 'package:nutriby_frontend/models/ingredient.dart';
 import 'package:nutriby_frontend/services/auth_service.dart';
 import 'package:nutriby_frontend/services/data_service.dart';
@@ -21,10 +22,12 @@ class RegisterStep3Form extends StatefulWidget {
 
 class _RegisterStep3FormState extends State<RegisterStep3Form> {
   final DataService _dataService = DataService();
+
+  List<Allergy> _allAllergies = [];
   List<Ingredient> _allIngredients = [];
   bool _isLoading = true;
 
-  final Set<Ingredient> _selectedAllergies = {};
+  final Set<Allergy> _selectedAllergies = {};
   final Set<Ingredient> _selectedFavorites = {};
 
   final TextEditingController _allergyController = TextEditingController();
@@ -34,7 +37,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      _fetchIngredients();
+      _fetchData();
     });
   }
 
@@ -45,48 +48,38 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
     super.dispose();
   }
 
-  Future<void> _fetchIngredients() async {
+  Future<void> _fetchData() async {
     final tokenExists = Provider.of<AuthService>(context, listen: false).token != null;
-    if (!tokenExists) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Sesi autentikasi tidak ditemukan.')),
-        );
-      }
-      return;
-    }
+    if (!tokenExists) return;
 
     try {
-      final ingredients = await _dataService.getIngredients();
+      final results = await Future.wait([
+        _dataService.getAllergies(),
+        _dataService.getIngredients(cleanOnly: true),
+      ]);
+
       if (mounted) {
         setState(() {
-          _allIngredients = ingredients;
+          _allAllergies = results[0] as List<Allergy>;
+          _allIngredients = results[1] as List<Ingredient>;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat data bahan: ${e.toString()}')),
-        );
       }
     }
   }
 
   void _updateTextFields() {
-    _allergyController.text = _selectedAllergies.map((i) => i.name).join(', ');
+    _allergyController.text = _selectedAllergies.map((a) => a.name).join(', ');
     _favoriteController.text = _selectedFavorites.map((i) => i.name).join(', ');
   }
 
-  Future<void> _showMultiSelectDialog({
-    required String title,
-    required List<Ingredient> items,
-    required Set<Ingredient> currentSelections,
-    required Set<Ingredient> disabledSelections,
-  }) async {
-    final Set<Ingredient> tempSelections = {...currentSelections};
+  // --- Dialog Pilih Alergi (Tidak Berubah Signifikan) ---
+  Future<void> _showAllergyDialog() async {
+    final Set<Allergy> tempSelections = {..._selectedAllergies};
 
     await showDialog(
       context: context,
@@ -94,7 +87,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
         return AlertDialog(
           backgroundColor: const Color(0xFFC70039).withOpacity(0.95),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const Text('Pilih Alergi', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           content: StatefulBuilder(
             builder: (context, setStateDialog) {
               return SizedBox(
@@ -103,29 +96,25 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
                     ? const Center(child: CircularProgressIndicator(color: Colors.white))
                     : ListView.builder(
                   shrinkWrap: true,
-                  itemCount: items.length,
+                  itemCount: _allAllergies.length,
                   itemBuilder: (context, index) {
-                    final item = items[index];
-                    final isSelected = tempSelections.any((i) => i.id == item.id);
-
-                    final bool isDisabled = disabledSelections.any((i) => i.id == item.id);
+                    final allergy = _allAllergies[index];
+                    final isSelected = tempSelections.any((a) => a.id == allergy.id);
 
                     return CheckboxListTile(
-                      title: Text(
-                        item.name,
-
-                        style: TextStyle(
-                          color: isDisabled ? Colors.white54 : Colors.white,
-                          decoration: isDisabled ? TextDecoration.lineThrough : null,
-                        ),
+                      title: Text(allergy.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      subtitle: Text(
+                        allergy.ingredients.map((i) => i.name).join(', '),
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        maxLines: 1, overflow: TextOverflow.ellipsis,
                       ),
                       value: isSelected,
-                      onChanged: isDisabled ? null : (bool? selected) {
+                      onChanged: (bool? selected) {
                         setStateDialog(() {
                           if (selected == true) {
-                            tempSelections.add(item);
+                            tempSelections.add(allergy);
                           } else {
-                            tempSelections.removeWhere((i) => i.id == item.id);
+                            tempSelections.removeWhere((a) => a.id == allergy.id);
                           }
                         });
                       },
@@ -147,13 +136,107 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
               child: const Text('Pilih', style: TextStyle(color: Color(0xFFC70039))),
               onPressed: () {
                 setState(() {
-                  if (title.contains('Alergi')) {
-                    _selectedAllergies.clear();
-                    _selectedAllergies.addAll(tempSelections);
-                  } else {
-                    _selectedFavorites.clear();
-                    _selectedFavorites.addAll(tempSelections);
-                  }
+                  _selectedAllergies.clear();
+                  _selectedAllergies.addAll(tempSelections);
+
+                  // ✅ LOGIKA PENYELARASAN:
+                  // Hapus item dari Favorit jika Alergi baru dipilih yang mengandung bahan tersebut
+                  final forbiddenIngredientIds = tempSelections
+                      .expand((a) => a.ingredients)
+                      .map((i) => i.id)
+                      .toSet();
+
+                  _selectedFavorites.removeWhere((fav) => forbiddenIngredientIds.contains(fav.id));
+
+                  _updateTextFields();
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // --- Dialog Pilih Favorit (Dengan Logika Disable Alergi) ---
+  Future<void> _showFavoriteDialog() async {
+    final Set<Ingredient> tempSelections = {..._selectedFavorites};
+
+    // ✅ LANGKAH 1: Kumpulkan ID semua bahan yang menyebabkan alergi yang dipilih
+    // Kita ambil semua ingredient dari setiap Allergy yang dipilih di _selectedAllergies
+    final Set<int> allergyIngredientIds = _selectedAllergies
+        .expand((allergy) => allergy.ingredients)
+        .map((ingredient) => ingredient.id)
+        .toSet();
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFC70039).withOpacity(0.95),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: const Text('Pilih Makanan Kesukaan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: StatefulBuilder(
+            builder: (context, setStateDialog) {
+              return SizedBox(
+                width: double.maxFinite,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                    : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _allIngredients.length,
+                  itemBuilder: (context, index) {
+                    final ingredient = _allIngredients[index];
+                    final isSelected = tempSelections.any((i) => i.id == ingredient.id);
+
+                    // ✅ LANGKAH 2: Cek apakah bahan ini termasuk alergi
+                    final bool isAllergic = allergyIngredientIds.contains(ingredient.id);
+
+                    return CheckboxListTile(
+                      title: Text(
+                        ingredient.name,
+                        style: TextStyle(
+                          // Jika alergi, teks dicoret dan transparan
+                          color: isAllergic ? Colors.white30 : Colors.white,
+                          decoration: isAllergic ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                      // Jika alergi, subtitle beri keterangan
+                      subtitle: isAllergic
+                          ? const Text("Tidak bisa dipilih (Alergi)", style: TextStyle(color: Colors.white38, fontSize: 11))
+                          : null,
+                      value: isSelected,
+                      // ✅ LANGKAH 3: Matikan checkbox (null) jika alergi
+                      onChanged: isAllergic ? null : (bool? selected) {
+                        setStateDialog(() {
+                          if (selected == true) {
+                            tempSelections.add(ingredient);
+                          } else {
+                            tempSelections.removeWhere((i) => i.id == ingredient.id);
+                          }
+                        });
+                      },
+                      activeColor: Colors.white,
+                      checkColor: const Color(0xFFC70039),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Batal', style: TextStyle(color: Colors.white70)),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+              child: const Text('Pilih', style: TextStyle(color: Color(0xFFC70039))),
+              onPressed: () {
+                setState(() {
+                  _selectedFavorites.clear();
+                  _selectedFavorites.addAll(tempSelections);
                   _updateTextFields();
                 });
                 Navigator.of(context).pop();
@@ -187,30 +270,22 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
             _buildDropdownField(
               label: 'Alergi Anak (jika ada)',
               controller: _allergyController,
-              onTap: () => _showMultiSelectDialog(
-                title: 'Pilih Alergi',
-                items: _allIngredients,
-                currentSelections: _selectedAllergies,
-                disabledSelections: _selectedFavorites,
-              ),
+              onTap: _showAllergyDialog,
             ),
             const SizedBox(height: 20),
+
             _buildDropdownField(
               label: 'Makanan Kesukaan',
               controller: _favoriteController,
-              onTap: () => _showMultiSelectDialog(
-                title: 'Pilih Makanan Kesukaan',
-                items: _allIngredients,
-                currentSelections: _selectedFavorites,
-                disabledSelections: _selectedAllergies,
-              ),
+              onTap: _showFavoriteDialog,
             ),
             const SizedBox(height: 60),
+
             ElevatedButton(
               onPressed: () {
                 final data = {
-                  'allergy_ids': _selectedAllergies.map((e) => e.id).toList(),
-                  'favorite_ids': _selectedFavorites.map((e) => e.id).toList(),
+                  'allergy_ids': _selectedAllergies.map((a) => a.id).toList(),
+                  'favorite_ids': _selectedFavorites.map((i) => i.id).toList(),
                 };
                 widget.onFinish(data);
               },
@@ -227,11 +302,7 @@ class _RegisterStep3FormState extends State<RegisterStep3Form> {
     );
   }
 
-  Widget _buildDropdownField({
-    required String label,
-    required TextEditingController controller,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildDropdownField({required String label, required TextEditingController controller, required VoidCallback onTap}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

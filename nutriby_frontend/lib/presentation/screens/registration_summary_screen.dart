@@ -17,19 +17,30 @@ class RegistrationSummaryScreen extends StatelessWidget {
     try {
       final birthDate = DateTime.parse(birthDateStr);
       final now = DateTime.now();
+
       int years = now.year - birthDate.year;
       int months = now.month - birthDate.month;
       int days = now.day - birthDate.day;
 
       if (days < 0) {
         months--;
+        // days logic tidak terlalu krusial untuk total bulan, tapi biarkan
         days += DateTime(now.year, now.month, 0).day;
       }
       if (months < 0) {
         years--;
         months += 12;
       }
-      return '$months bulan, $days hari';
+
+      // FIX: Hitung total bulan gabungan dari tahun dan bulan sisa
+      int totalMonths = (years * 12) + months;
+
+      // Jika ingin detail hari juga:
+      if (days > 0) {
+        return '$totalMonths bulan, $days hari';
+      }
+      return '$totalMonths bulan';
+
     } catch (e) {
       return 'Gagal menghitung umur';
     }
@@ -58,7 +69,7 @@ class RegistrationSummaryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFC70039),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -101,7 +112,7 @@ class RegistrationSummaryScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70, fontSize: 15, fontStyle: FontStyle.italic),
               ),
-              const Spacer(),
+              const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushAndRemoveUntil(

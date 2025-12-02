@@ -30,7 +30,11 @@ class ChildService {
     final response = await _api.patch(endpoint, data);
 
     if (response.statusCode == 200) {
-      return Child.fromJson(json.decode(response.body));
+      final body = json.decode(response.body);
+      if (body['child'] != null) {
+        return Child.fromJson(body['child']);
+      }
+      return Child.fromJson(body);
     } else {
       final errorData = json.decode(response.body);
       final message = errorData['message'] ?? 'Gagal memperbarui preferensi anak';

@@ -3,13 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:nutriby_frontend/models/child.dart';
 import 'package:nutriby_frontend/models/ingredient.dart';
+import 'package:nutriby_frontend/models/allergy.dart';
 import 'package:nutriby_frontend/models/weekly_plan.dart';
-import 'package:nutriby_frontend/presentation/screens/weekly_plan_display_screen.dart'; // Halaman selanjutnya
+import 'package:nutriby_frontend/presentation/screens/weekly_plan_display_screen.dart';
 import 'package:nutriby_frontend/presentation/screens/widgets/loading_dialog.dart';
 import 'package:nutriby_frontend/services/child_service.dart';
 import 'package:nutriby_frontend/services/data_service.dart';
 import 'package:nutriby_frontend/services/weekly_plan_service.dart';
 import 'package:nutriby_frontend/utils/currency_input_formatter.dart';
+
+import '../../services/data_service.dart';
 
 class WeeklyPlanSetupScreen extends StatefulWidget {
   const WeeklyPlanSetupScreen({super.key});
@@ -25,6 +28,7 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
   final WeeklyPlanService _weeklyPlanService = WeeklyPlanService();
 
   Child? _currentChild;
+  List<Allergy> _allAllergies = [];
   List<Ingredient> _allIngredients = [];
   bool _isLoading = true;
   String? _loadingError;
@@ -32,7 +36,8 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
   final TextEditingController _budgetController = TextEditingController();
   final TextEditingController _allergyController = TextEditingController();
   final TextEditingController _favoriteController = TextEditingController();
-  Set<Ingredient> _selectedAllergies = {};
+
+  Set<Allergy> _selectedAllergies = {};
   Set<Ingredient> _selectedFavorites = {};
 
   String _recommendedBudgetHint = "Memuat rekomendasi...";
@@ -61,10 +66,22 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
       }
       _currentChild = children.first;
 
-      _allIngredients = await _dataService.getIngredients();
+      final results = await Future.wait([
+        _dataService.getAllergies(),
+        _dataService.getIngredients(cleanOnly: true),
+      ]);
 
-      _selectedAllergies = _currentChild!.allergies.toSet();
+      _allAllergies = results[0] as List<Allergy>;
+      _allIngredients = results[1] as List<Ingredient>;
+
+      final childAllergyIds = _currentChild!.allergies.map((e) => e.id).toSet();
+      _selectedAllergies = _allAllergies
+          .where((a) => childAllergyIds.contains(a.id))
+          .toSet();
+
+      // Load favorites
       _selectedFavorites = _currentChild!.favoriteIngredients.toSet();
+
       _updateTextFields();
       _calculateRecommendedBudgetHint();
 
@@ -98,103 +115,9 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
     _favoriteController.text = _selectedFavorites.map((i) => i.name).join(', ');
   }
 
-  Future<void> _showMultiSelectDialog({
-    required String title,
-    required Set<Ingredient> currentSelections,
-    required Set<Ingredient> disabledSelections,
-  }) async {
-    Future<void> _showMultiSelectDialog({
-      required String title,
-      required Set<Ingredient> currentSelections,
-      required Set<Ingredient> disabledSelections,
-    }) async {
-      final Set<Ingredient> tempSelections = {...currentSelections};
-
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFC70039).withOpacity(0.95),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-
-            content: StatefulBuilder(
-              builder: (context, setStateDialog) {
-                return SizedBox(
-                  width: double.maxFinite,
-                  child: _isLoading
-                      ? const Center(child: CircularProgressIndicator(color: Colors.white))
-                      : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _allIngredients.length,
-                    itemBuilder: (context, index) {
-                      final item = _allIngredients[index];
-                      final isSelected = tempSelections.any((i) => i.id == item.id);
-                      final bool isDisabled = disabledSelections.any((i) => i.id == item.id);
-
-                      return CheckboxListTile(
-                        title: Text(
-                          item.name,
-                          style: TextStyle(
-                            color: isDisabled ? Colors.white54 : Colors.white,
-                            decoration: isDisabled ? TextDecoration.lineThrough : null,
-                          ),
-                        ),
-                        value: isSelected,
-                        onChanged: isDisabled ? null : (bool? selected) {
-                          setStateDialog(() {
-                            if (selected == true) {
-                              tempSelections.add(item);
-                            } else {
-                              tempSelections.removeWhere((i) => i.id == item.id);
-                            }
-                          });
-                        },
-                        activeColor: Colors.white,
-                        checkColor: const Color(0xFFC70039),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-
-            actions: [
-              TextButton(
-                child: const Text('Batal', style: TextStyle(color: Colors.white70)),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-                child: const Text('Pilih', style: TextStyle(color: Color(0xFFC70039))),
-                onPressed: () {
-                  final bool changed = !(Set.from(currentSelections).containsAll(tempSelections) &&
-                      Set.from(tempSelections).containsAll(currentSelections));
-
-                  if (changed) {
-                    setState(() {
-                      if (title.contains('Alergi')) {
-                        _selectedAllergies.clear();
-                        _selectedAllergies.addAll(tempSelections);
-                        _selectedFavorites.removeWhere((fav) => tempSelections.any((sel) => sel.id == fav.id));
-                      } else {
-                        _selectedFavorites.clear();
-                        _selectedFavorites.addAll(tempSelections);
-                        _selectedAllergies.removeWhere((alg) => tempSelections.any((sel) => sel.id == alg.id));
-                      }
-                      _updateTextFields();
-                      _preferencesChanged = true;
-                    });
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-    final Set<Ingredient> tempSelections = {...currentSelections};
+  // ✅ UPDATE: Dialog Alergi dengan penghapusan konflik favorit
+  Future<void> _showAllergyDialog() async {
+    final Set<Allergy> tempSelections = {..._selectedAllergies};
 
     await showDialog(
       context: context,
@@ -202,7 +125,7 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
         return AlertDialog(
           backgroundColor: const Color(0xFFC70039).withOpacity(0.95),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const Text('Pilih Alergi', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           content: StatefulBuilder(
             builder: (context, setStateDialog) {
               return SizedBox(
@@ -211,22 +134,17 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
                     ? const Center(child: CircularProgressIndicator(color: Colors.white))
                     : ListView.builder(
                   shrinkWrap: true,
-                  itemCount: _allIngredients.length,
+                  itemCount: _allAllergies.length,
                   itemBuilder: (context, index) {
-                    final item = _allIngredients[index];
+                    final item = _allAllergies[index];
                     final isSelected = tempSelections.any((i) => i.id == item.id);
-                    final bool isDisabled = disabledSelections.any((i) => i.id == item.id);
+                    final ingredientsText = item.ingredients.map((i) => i.name).join(', ');
 
                     return CheckboxListTile(
-                      title: Text(
-                        item.name,
-                        style: TextStyle(
-                          color: isDisabled ? Colors.white54 : Colors.white,
-                          decoration: isDisabled ? TextDecoration.lineThrough : null,
-                        ),
-                      ),
+                      title: Text(item.name, style: const TextStyle(color: Colors.white)),
+                      subtitle: Text(ingredientsText, style: const TextStyle(color: Colors.white70, fontSize: 12), maxLines: 1),
                       value: isSelected,
-                      onChanged: isDisabled ? null : (bool? selected) {
+                      onChanged: (bool? selected) {
                         setStateDialog(() {
                           if (selected == true) {
                             tempSelections.add(item);
@@ -252,19 +170,20 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
               child: const Text('Pilih', style: TextStyle(color: Color(0xFFC70039))),
               onPressed: () {
-                final bool changed = !(Set.from(currentSelections).containsAll(tempSelections) &&
-                    Set.from(tempSelections).containsAll(currentSelections));
+                final bool changed = !(Set.from(_selectedAllergies).containsAll(tempSelections) &&
+                    Set.from(tempSelections).containsAll(_selectedAllergies));
+
                 if (changed) {
                   setState(() {
-                    if (title.contains('Alergi')) {
-                      _selectedAllergies.clear();
-                      _selectedAllergies.addAll(tempSelections);
-                      _selectedFavorites.removeWhere((fav) => tempSelections.any((sel) => sel.id == fav.id));
-                    } else {
-                      _selectedFavorites.clear();
-                      _selectedFavorites.addAll(tempSelections);
-                      _selectedAllergies.removeWhere((alg) => tempSelections.any((sel) => sel.id == alg.id));
-                    }
+                    _selectedAllergies = tempSelections;
+
+                    // Logic Penyelarasan
+                    final forbiddenIds = _selectedAllergies
+                        .expand((a) => a.ingredients)
+                        .map((i) => i.id)
+                        .toSet();
+                    _selectedFavorites.removeWhere((fav) => forbiddenIds.contains(fav.id));
+
                     _updateTextFields();
                     _preferencesChanged = true;
                   });
@@ -278,6 +197,90 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
     );
   }
 
+  // ✅ UPDATE: Dialog Favorit dengan disable alergi
+  Future<void> _showFavoriteDialog() async {
+    final Set<Ingredient> tempSelections = {..._selectedFavorites};
+
+    // Kumpulkan ID bahan alergi
+    final forbiddenIds = _selectedAllergies
+        .expand((a) => a.ingredients)
+        .map((i) => i.id)
+        .toSet();
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFC70039).withOpacity(0.95),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: const Text('Pilih Makanan Kesukaan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: StatefulBuilder(
+            builder: (context, setStateDialog) {
+              return SizedBox(
+                width: double.maxFinite,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                    : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _allIngredients.length,
+                  itemBuilder: (context, index) {
+                    final item = _allIngredients[index];
+                    final isSelected = tempSelections.any((i) => i.id == item.id);
+                    final isAllergic = forbiddenIds.contains(item.id);
+
+                    return CheckboxListTile(
+                      title: Text(
+                        item.name,
+                        style: TextStyle(
+                          color: isAllergic ? Colors.white38 : Colors.white,
+                          decoration: isAllergic ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                      subtitle: isAllergic ? const Text("Alergi", style: TextStyle(color: Colors.white30, fontSize: 10)) : null,
+                      value: isSelected,
+                      onChanged: isAllergic ? null : (bool? selected) {
+                        setStateDialog(() {
+                          if (selected == true) {
+                            tempSelections.add(item);
+                          } else {
+                            tempSelections.removeWhere((i) => i.id == item.id);
+                          }
+                        });
+                      },
+                      activeColor: Colors.white,
+                      checkColor: const Color(0xFFC70039),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Batal', style: TextStyle(color: Colors.white70)),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+              child: const Text('Pilih', style: TextStyle(color: Color(0xFFC70039))),
+              onPressed: () {
+                final bool changed = !(Set.from(_selectedFavorites).containsAll(tempSelections) &&
+                    Set.from(tempSelections).containsAll(_selectedFavorites));
+                if (changed) {
+                  setState(() {
+                    _selectedFavorites = tempSelections;
+                    _updateTextFields();
+                    _preferencesChanged = true;
+                  });
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<void> _handleGeneratePlan() async {
     if (_isLoading || _loadingError != null || _currentChild == null) return;
@@ -378,22 +381,14 @@ class _WeeklyPlanSetupScreenState extends State<WeeklyPlanSetupScreen> {
               _buildDropdownField(
                 label: 'Alergi Anak',
                 controller: _allergyController,
-                onTap: () => _showMultiSelectDialog(
-                  title: 'Pilih Alergi',
-                  currentSelections: _selectedAllergies,
-                  disabledSelections: _selectedFavorites,
-                ),
+                onTap: _showAllergyDialog,
               ),
               const SizedBox(height: 24),
 
               _buildDropdownField(
                 label: 'Makanan Kesukaan',
                 controller: _favoriteController,
-                onTap: () => _showMultiSelectDialog(
-                  title: 'Pilih Makanan Kesukaan',
-                  currentSelections: _selectedFavorites,
-                  disabledSelections: _selectedAllergies,
-                ),
+                onTap: _showFavoriteDialog,
               ),
               const SizedBox(height: 48),
 

@@ -28,7 +28,19 @@ class RecipeDetailScreen extends StatelessWidget {
               child: _buildRecipeImage(recipe.fullImageUrl),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          if (recipe.nutritionFocus == 'height_booster')
+            _buildSpecialBadge(
+              label: '🚀 PENINGGI BADAN (Anti-Stunting)', 
+              color: Colors.blue.shade700
+            )
+          else if (recipe.nutritionFocus == 'weight_booster')
+            _buildSpecialBadge(
+              label: '💪 PENAMBAH BERAT BADAN', 
+              color: Colors.orange.shade800
+            ),
+          const SizedBox(height: 12),
 
           Text(
             recipe.title,
@@ -54,6 +66,8 @@ class RecipeDetailScreen extends StatelessWidget {
               _buildInfoRow('Kalori:', '${recipe.calories?.toStringAsFixed(0) ?? 'N/A'} kkal'),
               _buildInfoRow('Protein:', '${recipe.proteinGrams?.toStringAsFixed(1) ?? 'N/A'} g'),
               _buildInfoRow('Lemak:', '${recipe.fatGrams?.toStringAsFixed(1) ?? 'N/A'} g'),
+              _buildInfoRow('Zat Besi (Iron):', '${recipe.ironTotalMg?.toStringAsFixed(1) ?? '-'} mg'),
+              _buildInfoRow('Seng (Zinc):', '${recipe.zincTotalMg?.toStringAsFixed(1) ?? '-'} mg'),
             ],
           ),
 
@@ -86,6 +100,29 @@ class RecipeDetailScreen extends StatelessWidget {
           height: 50,
           alignment: Alignment.center,
           child: const Text('© Copyright by NutriBy', style: TextStyle(color: Colors.white70, fontSize: 14)),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildSpecialBadge({required String label, required Color color}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          letterSpacing: 1.0,
         ),
       ),
     );

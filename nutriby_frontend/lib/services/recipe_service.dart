@@ -24,10 +24,11 @@ class RecipeService {
     }
   }
 
+  /// ✅ FIXED: Sekarang pakai allergyIds (bukan ingredient IDs untuk alergi)
   Future<List<Recipe>> filterRecipes({
     int? mainIngredientId,
     int? maxCost,
-    List<int>? allergyIds,
+    List<int>? allergyIds, // ✅ RENAMED dari allergyIngredientIds
     int? ageMonths,
     int page = 1,
   }) async {
@@ -44,6 +45,8 @@ class RecipeService {
     if (ageMonths != null) {
       queryParams['age_months'] = ageMonths.toString();
     }
+
+    // ✅ FIXED: Kirim allergy_ids (bukan ingredient_ids)
     if (allergyIds != null && allergyIds.isNotEmpty) {
       for (int i = 0; i < allergyIds.length; i++) {
         queryParams['allergy_ids[$i]'] = allergyIds[i].toString();
@@ -51,13 +54,12 @@ class RecipeService {
     }
 
     final queryString = queryParams.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(
-        e.value)}')
+        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
         .join('&');
 
     final endpoint = '/recipes/filter?$queryString';
-
     final http.Response response;
+
     try {
       response = await _api.get(endpoint);
     } catch (e) {

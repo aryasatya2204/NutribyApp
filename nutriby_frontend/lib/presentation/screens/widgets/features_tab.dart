@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutriby_frontend/presentation/screens/allergy_facts_screen.dart';
 
 import '../daily_menu_setup_screen.dart';
+import '../weekly_plan_entry_screen.dart';
 import '../weekly_plan_setup_screen.dart';
 
 // Halaman Placeholder untuk navigasi
@@ -44,7 +45,7 @@ class FeaturesTab extends StatelessWidget {
             imagePlaceholder: 'assets/images/feature_weekly.png',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const WeeklyPlanSetupScreen(),
+                builder: (_) => const WeeklyPlanEntryScreen(),
               ));
             },
           ),

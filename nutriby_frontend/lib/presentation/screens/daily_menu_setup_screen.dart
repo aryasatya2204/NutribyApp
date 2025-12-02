@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nutriby_frontend/models/child.dart';
 import 'package:nutriby_frontend/models/ingredient.dart';
+import 'package:nutriby_frontend/models/allergy.dart';
 import 'package:nutriby_frontend/models/recipe.dart';
 import 'package:nutriby_frontend/presentation/screens/daily_menu_results_screen.dart'; // Halaman hasil
 import 'package:nutriby_frontend/presentation/screens/widgets/loading_dialog.dart';
@@ -25,10 +26,11 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final ChildService _childService = ChildService();
   final DataService _dataService = DataService();
-  final RecipeService _recipeService = RecipeService(); // Tambahkan RecipeService
+  final RecipeService _recipeService = RecipeService();
 
   // State
   Child? _currentChild;
+  List<Allergy> _allAllergies = [];
   List<Ingredient> _allIngredients = [];
   bool _isLoading = true;
   String? _loadingError;
@@ -36,7 +38,8 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
   // Form Controllers & Selections
   final TextEditingController _budgetController = TextEditingController();
   final TextEditingController _allergyController = TextEditingController();
-  Set<Ingredient> _selectedAllergies = {};
+
+  Set<Allergy> _selectedAllergies = {};
   Ingredient? _selectedMainIngredient; // Single selection
   bool _preferencesChanged = false;
 
@@ -55,17 +58,26 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
 
   /// Memuat data awal: data anak dan daftar bahan.
   Future<void> _loadInitialData() async {
-    // Implementasi mirip WeeklyPlanSetupScreen
-    // ... (Ambil data anak, ambil data ingredients)
     setState(() => _isLoading = true);
     try {
       final children = await _childService.getMyChildren();
       if (children.isEmpty) throw Exception("Anda belum memiliki data anak.");
       _currentChild = children.first;
 
-      _allIngredients = await _dataService.getIngredients();
+      // Load master data
+      final results = await Future.wait([
+        _dataService.getAllergies(),
+        _dataService.getIngredients(cleanOnly: true),
+      ]);
 
-      _selectedAllergies = _currentChild!.allergies.toSet();
+      _allAllergies = results[0] as List<Allergy>;
+      _allIngredients = results[1] as List<Ingredient>;
+
+      final childAllergyIds = _currentChild!.allergies.map((e) => e.id).toSet();
+      _selectedAllergies = _allAllergies
+          .where((a) => childAllergyIds.contains(a.id))
+          .toSet();
+
       _updateAllergyTextField();
 
       setState(() => _isLoading = false);
@@ -79,109 +91,13 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
     }
   }
 
-
-  /// Update text field alergi.
   void _updateAllergyTextField() {
     _allergyController.text = _selectedAllergies.map((i) => i.name).join(', ');
   }
 
   /// Menampilkan dialog multi-select untuk alergi.
   Future<void> _showAllergySelectDialog() async {
-    /// Menampilkan dialog multi-select untuk alergi.
-    Future<void> _showAllergySelectDialog() async {
-      // Salinan sementara dari alergi yang sudah dipilih
-      final Set<Ingredient> tempSelections = {..._selectedAllergies};
-
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            // --- Style Dialog ---
-            backgroundColor: const Color(0xFFC70039).withOpacity(0.95),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            title: const Text("Pilih Alergi Anak", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-
-            // --- Konten Dialog (Daftar Checkbox) ---
-            content: StatefulBuilder(
-              builder: (context, setStateDialog) {
-                return SizedBox(
-                  width: double.maxFinite,
-                  // Tampilkan loading jika data bahan belum siap
-                  child: _isLoading
-                      ? const Center(child: CircularProgressIndicator(color: Colors.white))
-                      : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _allIngredients.length,
-                    itemBuilder: (context, index) {
-                      final item = _allIngredients[index];
-                      // Cek apakah item ini sudah dipilih sementara
-                      final isSelected = tempSelections.any((i) => i.id == item.id);
-                      // Cek apakah item ini adalah bahan utama yang dipilih (harus dinonaktifkan)
-                      final isDisabled = _selectedMainIngredient?.id == item.id;
-
-                      // Buat CheckboxListTile
-                      return CheckboxListTile(
-                        title: Text(
-                          item.name,
-                          style: TextStyle( // Style berbeda jika item disabled
-                            color: isDisabled ? Colors.white54 : Colors.white,
-                            decoration: isDisabled ? TextDecoration.lineThrough : null,
-                          ),
-                        ),
-                        value: isSelected,
-                        // Set onChanged ke null jika item disabled
-                        onChanged: isDisabled ? null : (bool? selected) {
-                          // Update state internal dialog (tempSelections)
-                          setStateDialog(() {
-                            if (selected == true) {
-                              tempSelections.add(item);
-                            } else {
-                              tempSelections.removeWhere((i) => i.id == item.id);
-                            }
-                          });
-                        },
-                        activeColor: Colors.white,
-                        checkColor: const Color(0xFFC70039), // Warna centang
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-
-            // --- Tombol Aksi Dialog ---
-            actions: [
-              TextButton(
-                child: const Text('Batal', style: TextStyle(color: Colors.white70)),
-                onPressed: () => Navigator.of(context).pop(), // Tutup dialog tanpa menyimpan
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-                child: const Text('Pilih', style: TextStyle(color: Color(0xFFC70039))),
-                onPressed: () {
-                  // --- Logika saat tombol 'Pilih' ditekan ---
-                  // Bandingkan pilihan sementara dengan pilihan awal (_selectedAllergies)
-                  final bool changed = !(Set.from(_selectedAllergies).containsAll(tempSelections) &&
-                      Set.from(tempSelections).containsAll(_selectedAllergies));
-
-                  // Hanya update state utama jika ada perubahan
-                  if (changed) {
-                    setState(() { // Update state _DailyMenuSetupScreenState
-                      _selectedAllergies.clear();
-                      _selectedAllergies.addAll(tempSelections);
-                      _updateAllergyTextField(); // Update teks di text field
-                      _preferencesChanged = true; // Set flag bahwa ada perubahan preferensi
-                    });
-                  }
-                  Navigator.of(context).pop(); // Tutup dialog
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-    final Set<Ingredient> tempSelections = {..._selectedAllergies};
+    final Set<Allergy> tempSelections = {..._selectedAllergies};
 
     await showDialog(
       context: context,
@@ -198,23 +114,25 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
                     ? const Center(child: CircularProgressIndicator(color: Colors.white))
                     : ListView.builder(
                   shrinkWrap: true,
-                  itemCount: _allIngredients.length,
+                  itemCount: _allAllergies.length,
                   itemBuilder: (context, index) {
-                    final item = _allIngredients[index];
+                    final item = _allAllergies[index];
                     final isSelected = tempSelections.any((i) => i.id == item.id);
-                    // Disable jika item ini adalah main ingredient yang dipilih
-                    final isDisabled = _selectedMainIngredient?.id == item.id;
+                    final ingredientsText = item.ingredients.map((i) => i.name).join(', ');
+
+                    // Cek konflik dengan bahan utama
+                    bool conflictsWithMain = false;
+                    if (_selectedMainIngredient != null) {
+                      conflictsWithMain = item.ingredients.any((i) => i.id == _selectedMainIngredient!.id);
+                    }
 
                     return CheckboxListTile(
-                      title: Text(
-                        item.name,
-                        style: TextStyle(
-                          color: isDisabled ? Colors.white54 : Colors.white,
-                          decoration: isDisabled ? TextDecoration.lineThrough : null,
-                        ),
-                      ),
+                      title: Text(item.name, style: const TextStyle(color: Colors.white)),
+                      subtitle: conflictsWithMain
+                          ? const Text("Konflik dengan bahan utama", style: TextStyle(color: Colors.yellow, fontSize: 11))
+                          : Text(ingredientsText, style: const TextStyle(color: Colors.white70, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                       value: isSelected,
-                      onChanged: isDisabled ? null : (bool? selected) {
+                      onChanged: (bool? selected) {
                         setStateDialog(() {
                           if (selected == true) {
                             tempSelections.add(item);
@@ -242,12 +160,23 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
               onPressed: () {
                 final bool changed = !(Set.from(_selectedAllergies).containsAll(tempSelections) &&
                     Set.from(tempSelections).containsAll(_selectedAllergies));
-                if(changed){
+
+                if (changed) {
                   setState(() {
-                    _selectedAllergies.clear();
-                    _selectedAllergies.addAll(tempSelections);
+                    _selectedAllergies = tempSelections;
                     _updateAllergyTextField();
                     _preferencesChanged = true;
+
+                    // Reset Main Ingredient jika konflik dengan alergi baru
+                    if (_selectedMainIngredient != null) {
+                      final forbiddenIds = _selectedAllergies.expand((a) => a.ingredients).map((i) => i.id).toSet();
+                      if (forbiddenIds.contains(_selectedMainIngredient!.id)) {
+                        _selectedMainIngredient = null;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Bahan utama di-reset karena termasuk dalam alergi baru.")),
+                        );
+                      }
+                    }
                   });
                 }
                 Navigator.of(context).pop();
@@ -259,8 +188,6 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
     );
   }
 
-
-  /// Proses saat tombol "Generate" ditekan.
   Future<void> _handleGenerate() async {
     if (_isLoading || _loadingError != null || _currentChild == null) return;
     if (!_formKey.currentState!.validate()) return;
@@ -277,10 +204,9 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
         await _childService.updateChildPreferences(
           childId: _currentChild!.id,
           allergyIds: _selectedAllergies.map((e) => e.id).toList(),
-          // Kirim favoriteIds yang ada saat ini agar tidak terhapus
           favoriteIds: _currentChild!.favoriteIngredients.map((e) => e.id).toList(),
         );
-        _preferencesChanged = false; // Reset flag
+        _preferencesChanged = false;
       }
 
       // 2. Ambil parameter filter
@@ -288,20 +214,33 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
       List<int> allergyIds = _selectedAllergies.map((e) => e.id).toList();
       int? mainIngredientId = _selectedMainIngredient?.id;
 
+      DateTime birthDate;
+      try {
+        birthDate = DateTime.parse(_currentChild!.birthDate);
+      } catch (e) {
+        throw Exception('Format tanggal lahir tidak valid');
+      }
+
+      final DateTime now = DateTime.now();
+      int ageInMonths = ((now.year - birthDate.year) * 12 + (now.month - birthDate.month));
+
+      if (now.day < birthDate.day) {
+        ageInMonths--;
+      }
+      if (ageInMonths < 6) {
+        ageInMonths = 6;
+      }
+
       // 3. Panggil API search/filter resep
-      //    PENTING: Backend perlu endpoint baru/modifikasi untuk ini.
-      //    Kita gunakan search yang ada, tapi idealnya perlu endpoint filter.
       final List<Recipe> results = await _recipeService.filterRecipes(
         mainIngredientId: mainIngredientId,
         maxCost: maxCost,
         allergyIds: allergyIds,
-        // ageMonths: ageInMonths, // Jika Anda menambahkan filter usia di backend
+        ageMonths: ageInMonths,
       );
 
-
       if (mounted) {
-        Navigator.of(context).pop(); // Tutup loading
-        // 4. Navigasi ke halaman hasil
+        Navigator.of(context).pop();
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -311,7 +250,7 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop(); // Tutup loading
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceFirst('Exception: ', '')),
@@ -325,6 +264,9 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
   @override
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xFFC70039);
+
+    // Siapkan set ID bahan yang dilarang (alergi)
+    final forbiddenIds = _selectedAllergies.expand((a) => a.ingredients).map((i) => i.id).toSet();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -367,7 +309,7 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-                validator: (value) { // Budget wajib diisi
+                validator: (value) {
                   if (value == null || value.isEmpty) return 'Budget wajib diisi';
                   return null;
                 },
@@ -376,7 +318,7 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
 
               // --- Alergi Anak (Editable) ---
               _buildSectionTitle('Alergi Anak (Data Tersimpan)'),
-              TextFormField( // Tampilan mirip dropdown
+              TextFormField(
                 controller: _allergyController,
                 readOnly: true,
                 onTap: _showAllergySelectDialog,
@@ -393,20 +335,26 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
               ),
               const SizedBox(height: 24),
 
-
               // --- Bahan Utama Dicari ---
               _buildSectionTitle('Bahan Makanan Utama Dicari'),
               DropdownButtonFormField<Ingredient>(
                 value: _selectedMainIngredient,
+                // ✅ FIX 1: isExpanded agar dropdown menyesuaikan lebar layar
+                isExpanded: true,
                 items: _allIngredients.map((ing) {
-                  // Disable jika bahan ini ada di daftar alergi
-                  final bool isDisabled = _selectedAllergies.any((allergy) => allergy.id == ing.id);
+                  final bool isDisabled = forbiddenIds.contains(ing.id);
                   return DropdownMenuItem<Ingredient>(
                     value: ing,
-                    enabled: !isDisabled, // Disable item
+                    enabled: !isDisabled,
                     child: Text(
                       ing.name,
-                      style: TextStyle(color: isDisabled ? Colors.grey : Colors.black),
+                      style: TextStyle(
+                        color: isDisabled ? Colors.grey : Colors.black,
+                        decoration: isDisabled ? TextDecoration.lineThrough : null,
+                      ),
+                      // ✅ FIX 2: Handle text panjang dengan ellipsis
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   );
                 }).toList(),
@@ -446,7 +394,7 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar( // Footer konsisten
+      bottomNavigationBar: BottomAppBar(
         color: const Color(0xFF333333),
         child: Container(
           height: 50,
@@ -457,7 +405,6 @@ class _DailyMenuSetupScreenState extends State<DailyMenuSetupScreen> {
     );
   }
 
-  /// Helper untuk judul section.
   Padding _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),

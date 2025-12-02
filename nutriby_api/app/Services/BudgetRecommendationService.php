@@ -63,7 +63,7 @@ class BudgetRecommendationService
      */
     private function getIdealRecipes(Child $child): Collection
     {
-        $allergyIngredientIds = $child->allergies()->pluck('ingredients.id');
+        $allergyIngredientIds = $child->getAllergenIngredientIds();
         $favoriteIngredientIds = $child->favoriteIngredients()->pluck('ingredients.id');
 
         // Filter recipes based on hard constraints (age, allergies).

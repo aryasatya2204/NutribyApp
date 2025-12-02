@@ -39,13 +39,16 @@ class _RegisterStep2FormState extends State<RegisterStep2Form> {
   void _handleNext() {
     if (widget.formKey.currentState!.validate()) {
       final data = {
-        'name': widget.nameController.text,
-        'birth_date': widget.birthDateController.text,
-        'gender': _selectedGender,
-        'current_weight': double.tryParse(widget.weightController.text) ?? 0.0,
-        'current_height': double.tryParse(widget.heightController.text) ?? 0.0,
-        'parent_monthly_income': widget.incomeController.text.replaceAll('.', ''),
+        'name': widget.nameController.text.trim(),
+        'birth_date': widget.birthDateController.text.trim(),
+        'gender': _selectedGender ?? 'male',
+        'current_weight': double.tryParse(widget.weightController.text.trim()) ?? 0.0,
+        'current_height': double.tryParse(widget.heightController.text.trim()) ?? 0.0,
+        'parent_monthly_income': widget.incomeController.text.replaceAll('.', '').replaceAll(',', '').trim(),
       };
+
+      print('Data being sent: $data');
+
       widget.onNext(data);
     }
   }

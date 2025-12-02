@@ -6,8 +6,14 @@ import 'package:nutriby_frontend/services/api_service.dart';
 class DataService {
   final ApiService _api = ApiService();
 
-  Future<List<Ingredient>> getIngredients() async {
-    final response = await _api.get('/ingredients');
+  /// ✅ UPDATED: Get ingredients dengan optional filter clean
+  Future<List<Ingredient>> getIngredients({bool cleanOnly = false}) async {
+    String endpoint = '/ingredients';
+    if (cleanOnly) {
+      endpoint = '/ingredients?category=Umum&clean=true';
+    }
+
+    final response = await _api.get(endpoint);
 
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
@@ -17,6 +23,7 @@ class DataService {
     }
   }
 
+  /// Get all allergies WITH their trigger ingredients
   Future<List<Allergy>> getAllergies() async {
     final response = await _api.get('/allergies');
 
@@ -28,6 +35,7 @@ class DataService {
     }
   }
 
+  /// Search allergies by name, symptom, or ingredient
   Future<List<Allergy>> searchAllergies(String query) async {
     try {
       final response = await _api.get('/allergies/search?q=$query');

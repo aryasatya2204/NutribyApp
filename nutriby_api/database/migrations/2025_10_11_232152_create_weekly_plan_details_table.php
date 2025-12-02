@@ -14,14 +14,15 @@ return new class extends Migration
         Schema::create('weekly_plan_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('weekly_plan_id')->constrained()->onDelete('cascade');
-            $table->foreignId('recipe_id')->constrained(); // Menu asli dari database resep kita
+            $table->foreignId('recipe_id')->constrained();
             $table->unsignedTinyInteger('day_of_week'); // 1=Senin, 2=Selasa, ..., 7=Minggu
-            $table->enum('meal_type', ['pagi', 'siang', 'sore']); // Waktu makan
-
-            // Kolom ini akan kita bahas di poin #2
+            $table->enum('meal_type', ['pagi', 'siang', 'sore']);
             $table->json('custom_ingredients_json')->nullable();
-
-            $table->unique(['weekly_plan_id', 'day_of_week', 'meal_type']); // Mencegah duplikasi data
+            
+            // ✅ TAMBAHKAN INI:
+            $table->timestamps(); // Menambahkan created_at dan updated_at
+            
+            $table->unique(['weekly_plan_id', 'day_of_week', 'meal_type']);
         });
     }
 

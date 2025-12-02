@@ -1,4 +1,6 @@
 import 'package:nutriby_frontend/models/ingredient.dart';
+import 'package:nutriby_frontend/models/growth_history.dart';
+import 'package:nutriby_frontend/models/allergy.dart'; // Pastikan import ini ada
 
 class Child {
   final int id;
@@ -14,8 +16,9 @@ class Child {
   final String? nutritionalStatusNotes;
   final int? budgetMin;
   final int? budgetMax;
-  final List<Ingredient> allergies;
+  final List<Allergy> allergies;
   final List<Ingredient> favoriteIngredients;
+  final List<GrowthHistory> growthHistories;
 
   Child({
     required this.id,
@@ -33,13 +36,34 @@ class Child {
     this.budgetMax,
     this.allergies = const [],
     this.favoriteIngredients = const [],
+    this.growthHistories = const [],
   });
 
   factory Child.fromJson(Map<String, dynamic> json) {
+    // Helper untuk parse Ingredient
     List<Ingredient> parseIngredients(String key) {
       if (json[key] != null && json[key] is List) {
         return (json[key] as List)
             .map((item) => Ingredient.fromJson(item))
+            .toList();
+      }
+      return [];
+    }
+
+    // ✅ FIX: Helper khusus untuk parse Allergy
+    List<Allergy> parseAllergies(String key) {
+      if (json[key] != null && json[key] is List) {
+        return (json[key] as List)
+            .map((item) => Allergy.fromJson(item))
+            .toList();
+      }
+      return [];
+    }
+
+    List<GrowthHistory> parseHistory(String key) {
+      if (json[key] != null && json[key] is List) {
+        return (json[key] as List)
+            .map((item) => GrowthHistory.fromJson(item))
             .toList();
       }
       return [];
@@ -50,19 +74,18 @@ class Child {
       name: json['name'],
       birthDate: json['birth_date'],
       gender: json['gender'],
-
       currentWeight: double.parse(json['current_weight'].toString()),
       currentHeight: double.parse(json['current_height'].toString()),
       parentMonthlyIncome: int.parse(json['parent_monthly_income'].toString()),
-
       nutritionalStatusWfa: json['nutritional_status_wfa'],
       nutritionalStatusHfa: json['nutritional_status_hfa'],
       nutritionalStatusWfh: json['nutritional_status_wfh'],
       nutritionalStatusNotes: json['nutritional_status_notes'],
       budgetMin: json['budget_min'],
       budgetMax: json['budget_max'],
-      allergies: parseIngredients('allergies'),
+      allergies: parseAllergies('allergies'), // ✅ Gunakan parser alergi
       favoriteIngredients: parseIngredients('favorite_ingredients'),
+      growthHistories: parseHistory('growth_histories'),
     );
   }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
+use App\Models\Allergy;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder; 
 
 class RecipeController extends Controller
@@ -74,48 +76,57 @@ class RecipeController extends Controller
      * @queryParam allergy_ids array optional An array of ingredient IDs to exclude. Example: [1, 4]
      * @queryParam age_months integer optional The child's age in months for age filtering. Example: 12
      */
-    public function filter(Request $request)
+     public function filter(Request $request)
     {
-        // 1. Validasi Input (opsional tapi sangat direkomendasikan)
         $validated = $request->validate([
             'main_ingredient_id' => 'nullable|integer|exists:ingredients,id',
             'max_cost' => 'nullable|integer|min:0',
+            
+            // ✅ FIXED: Sekarang menerima allergy_ids (bukan ingredient_ids)
             'allergy_ids' => 'nullable|array',
-            'allergy_ids.*' => 'integer|exists:ingredients,id',
-            'age_months' => 'nullable|integer|min:6|max:24', // Contoh validasi usia
+            'allergy_ids.*' => 'integer|exists:allergies,id',
+            
+            'age_months' => 'nullable|integer|min:6|max:24',
         ]);
 
-        // 2. Memulai Query Builder
-        $query = Recipe::query()->with('ingredients'); // Selalu eager load ingredients
+        $query = Recipe::query()->with('ingredients');
 
-        // 3. Menerapkan Filter secara Kondisional
-
-        // Filter: Hanya resep yang mengandung 'main_ingredient_id'
+        // Filter: Main ingredient
         if ($request->filled('main_ingredient_id')) {
-            $query->whereHas('ingredients', function (Builder $ingredientQuery) use ($request) {
-                $ingredientQuery->where('ingredients.id', $request->input('main_ingredient_id'));
+            $query->whereHas('ingredients', function (Builder $q) use ($request) {
+                $q->where('ingredients.id', $request->input('main_ingredient_id'));
             });
         }
 
-        // Filter: Hanya resep dengan biaya <= 'max_cost'
+        // Filter: Max cost
         if ($request->filled('max_cost')) {
             $query->where('estimated_cost', '<=', $request->input('max_cost'));
         }
 
-        // Filter: Kecualikan resep yang mengandung bahan dari 'allergy_ids'
-        if ($request->filled('allergy_ids') && is_array($request->input('allergy_ids'))) {
-             // Pastikan allergy_ids adalah array sebelum digunakan
-             $allergyIds = $request->input('allergy_ids');
-             // Hanya terapkan filter jika array tidak kosong
-             if (!empty($allergyIds)) {
-                $query->whereDoesntHave('ingredients', function (Builder $ingredientQuery) use ($allergyIds) {
-                    $ingredientQuery->whereIn('ingredients.id', $allergyIds);
+        // ✅ FIXED: Filter by allergy groups
+        if ($request->filled('allergy_ids') && !empty($request->input('allergy_ids'))) {
+            $allergyIds = $request->input('allergy_ids');
+            
+            // Ambil semua ingredient IDs dari grup alergi yang dipilih
+            $allergenIngredientIds = Allergy::whereIn('id', $allergyIds)
+                ->with('ingredients')
+                ->get()
+                ->pluck('ingredients')
+                ->flatten()
+                ->pluck('id')
+                ->unique()
+                ->values()
+                ->toArray();
+            
+            // Exclude resep yang mengandung bahan-bahan tersebut
+            if (!empty($allergenIngredientIds)) {
+                $query->whereDoesntHave('ingredients', function (Builder $q) use ($allergenIngredientIds) {
+                    $q->whereIn('ingredients.id', $allergenIngredientIds);
                 });
-             }
+            }
         }
 
-
-        // Filter: Hanya resep yang sesuai dengan 'age_months' (jika ada)
+        // Filter: Age range
         if ($request->filled('age_months')) {
             $age = $request->input('age_months');
             $query->where('min_age_months', '<=', $age)
@@ -125,12 +136,10 @@ class RecipeController extends Controller
                   });
         }
 
-        // 4. Eksekusi Query dengan Simple Pagination
-        // simplePaginate lebih efisien untuk kasus "load more" / infinite scroll
-        $recipes = $query->orderBy('title') // Urutkan berdasarkan judul
-                         ->simplePaginate(15); // Ambil 15 resep per halaman
+        // Execute query
+        $recipes = $query->orderBy('title')
+                         ->simplePaginate(15);
 
-        // 5. Kembalikan Hasil
         return response()->json($recipes);
     }
 }

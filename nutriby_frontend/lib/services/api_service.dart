@@ -5,8 +5,8 @@ import 'dart:convert';
 class ApiService {
   // Gunakan IP 10.0.2.2 untuk emulator Android agar bisa mengakses localhost di komputer.
   // Ganti dengan IP address komputer jika testing di perangkat fisik.
-  final String _baseUrl = 'http://10.0.2.2:8000/api';
-  // final String _baseUrl = 'http://192.168.213.209:8000/api';
+  // final String _baseUrl = 'http://10.0.2.2:8000/api';
+  final String _baseUrl = 'http://192.168.1.5:8000/api';
 
   String getBaseUrl() {
     return _baseUrl;
