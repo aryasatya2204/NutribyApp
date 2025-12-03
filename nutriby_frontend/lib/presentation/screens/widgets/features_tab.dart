@@ -42,7 +42,7 @@ class FeaturesTab extends StatelessWidget {
             context: context,
             title: 'MPASI Mingguan',
             subtitle: 'Rencana makan 7 hari penuh gizi.',
-            imagePlaceholder: 'assets/images/feature_weekly.png',
+            imagePlaceholder: 'assets/images/feature_weekly.png.jpg',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => const WeeklyPlanEntryScreen(),
@@ -54,7 +54,7 @@ class FeaturesTab extends StatelessWidget {
             context: context,
             title: 'Fakta Alergi',
             subtitle: 'Ketahui pemicu & cara menanganinya.',
-            imagePlaceholder: 'assets/images/feature_allergy.png',
+            imagePlaceholder: 'assets/images/feature_allergy.png.jpg',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => const AllergyFactsScreen(),
@@ -66,7 +66,7 @@ class FeaturesTab extends StatelessWidget {
             context: context,
             title: 'Generate Menu',
             subtitle: 'Buat resep instan sesuai kebutuhan.',
-            imagePlaceholder: 'assets/images/feature_generate.png',
+            imagePlaceholder: 'assets/images/feature_generate.png.jpg',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => const DailyMenuSetupScreen(),

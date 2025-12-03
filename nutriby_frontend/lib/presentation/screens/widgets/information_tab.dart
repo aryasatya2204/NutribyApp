@@ -19,17 +19,17 @@ class _InformationTabState extends State<InformationTab> {
     {
       'title': 'Gizi Seimbang, Anak Cemerlang',
       'subtitle': 'Pastikan MPASI si kecil kaya akan protein hewani untuk tumbuh kembang otaknya.',
-      'image_placeholder': 'assets/images/placeholder_gizi.png',
+      'image_placeholder': 'assets/images/placeholder_gizi.png.jpg',
     },
     {
       'title': 'Pentingnya 1000 Hari Pertama',
       'subtitle': 'Masa emas pertumbuhan otak dan fisik anak yang tidak boleh terlewatkan.',
-      'image_placeholder': 'assets/images/placeholder_1000hari.png',
+      'image_placeholder': 'assets/images/placeholder_1000hari.png.jpg',
     },
     {
       'title': 'Kenali Tanda Stunting',
       'subtitle': 'Anak lebih pendek dari teman sebayanya? Mungkin itu salah satu tandanya.',
-      'image_placeholder': 'assets/images/placeholder_stunting.png',
+      'image_placeholder': 'assets/images/placeholder_stunting.png.jpg',
     },
   ];
 

@@ -179,7 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           Image.asset(
-            child.gender == 'male' ? 'assets/images/gender_boy.png' : 'assets/images/gender_girl.png',
+            child.gender == 'male' ? 'assets/images/gender_boy.png.jpg' : 'assets/images/gender_girl.png.jpg',
             height: 100,
           ),
           const SizedBox(height: 16),
