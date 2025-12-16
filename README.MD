@@ -61,54 +61,48 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 
 ## 📁 Struktur Project
 
-```bash
-lib/
-├── config/
-│   └── routes.dart
+## 📂 Struktur Project
+
+Berikut adalah struktur direktori lengkap (Monorepo) yang menggabungkan Backend dan Frontend:
+
+```text
+.
+├── nutriby_api/                # 🖥️ BACKEND SERVICE
+│   ├── Dockerfile              # Konfigurasi container backend
+│   └── ... (Source code API)
 │
-├── models/
-│   ├── food.dart
-│   ├── nutrition.dart
-│   └── user_profile.dart
+├── nutriby_frontend/           # 📱 FRONTEND FLUTTER
+│   ├── android/                # Native Android configs (Gradle, KeyStore)
+│   ├── ios/                    # Native iOS configs
+│   ├── lib/                    # SOURCE CODE UTAMA
+│   │   ├── main.dart               # 🚀 Entry point aplikasi (Fungsi main)
+│   │   ├── config/
+│   │   │   └── routes.dart             # Routing & Navigasi
+│   │   ├── models/
+│   │   │   ├── food.dart               # Model data makanan
+│   │   │   ├── nutrition.dart          # Logika kalkulasi gizi
+│   │   │   └── user_profile.dart       # Model pengguna
+│   │   ├── providers/
+│   │   │   ├── app_state_provider.dart # Global state
+│   │   │   ├── auth_provider.dart      # Auth logic
+│   │   │   └── nutrition_provider.dart # Nutrition logic
+│   │   ├── repositories/
+│   │   │   ├── food_repository.dart    # API Service untuk Makanan
+│   │   │   └── user_repository.dart    # API Service untuk User
+│   │   ├── screens/
+│   │   │   ├── home_screen.dart        # Dashboard Utama
+│   │   │   ├── food_detail_screen.dart # Detail Nutrisi
+│   │   │   ├── tracker_screen.dart     # Input Data Makan
+│   │   │   ├── favorite_screen.dart    # Menu Favorit
+│   │   │   ├── profile_screen.dart     # Edit Profil
+│   │   │   ├── signin_screen.dart      # Halaman Masuk
+│   │   │   └── signup_screen.dart      # Halaman Daftar
+│   │   └── services/
+│   │       └── auth/                   # Integrasi Firebase Auth
+│   └── pubspec.yaml            # Dependencies Flutter
 │
-├── providers/
-│   ├── app_state_provider.dart
-│   ├── auth_provider.dart
-│   └── nutrition_provider.dart
-│
-├── repositories/
-│   ├── food_repository.dart
-│   └── user_repository.dart
-│
-├── screens/
-│   ├── home_screen.dart
-│   ├── food_detail_screen.dart
-│   ├── tracker_screen.dart
-│   ├── favorite_screen.dart
-│   ├── profile_screen.dart
-│   ├── signin_screen.dart
-│   └── signup_screen.dart
-│
-├── services/
-│   ├── auth/
-│   │   └── firebase_auth_service.dart
-│   ├── firestore_service.dart
-│   └── nutrition_api_service.dart
-│
-├── utils/
-│   ├── snackbar_helper.dart
-│   ├── validators.dart
-│   └── constants.dart
-│
-├── widgets/
-│   ├── food_card.dart
-│   ├── nutrition_info.dart
-│   ├── app_scaffold.dart
-│   ├── bottom_navigation_shell.dart
-│   └── favorite_food_card.dart
-│
-└── main.dart
-```
+├── .gitignore                  # Git ignore rules
+└── README.md                   # Dokumentasi ini
 ---
 
 ## 🚀 Panduan Instalasi & Setup
