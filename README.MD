@@ -40,40 +40,49 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 lib/
 ├── config/
 │   └── routes.dart
-│       # Konfigurasi GoRouter & guard navigasi (auth / onboarding)
 │
 ├── models/
 │   ├── food.dart
-│   │   # Data model makanan (JSON serialization)
 │   ├── nutrition.dart
-│   │   # Model informasi gizi (kalori, protein, lemak, dll)
 │   └── user_profile.dart
-│       # Model data profil pengguna
 │
 ├── providers/
 │   ├── app_state_provider.dart
-│   │   # State utama aplikasi (makanan, kalkulasi gizi, UI state)
 │   ├── auth_provider.dart
-│   │   # Logic autentikasi user & sinkronisasi UI
 │   └── nutrition_provider.dart
-│       # Logic perhitungan & manajemen nutrisi
 │
 ├── repositories/
 │   ├── food_repository.dart
-│   │   # Layer komunikasi ke API / data sumber makanan
 │   └── user_repository.dart
-│       # Akses data user (Firestore / local storage)
 │
 ├── screens/
 │   ├── home_screen.dart
-│   │   # Dashboard utama NutribyApp
 │   ├── food_detail_screen.dart
-│   │   # Detail makanan & nilai gizi
 │   ├── tracker_screen.dart
-│   │   # Halaman tracking konsumsi harian
 │   ├── favorite_screen.dart
-│   │   # Daftar makanan favorit
-│   ├── profile_screen._
+│   ├── profile_screen.dart
+│   ├── signin_screen.dart
+│   └── signup_screen.dart
+│
+├── services/
+│   ├── auth/
+│   │   └── firebase_auth_service.dart
+│   ├── firestore_service.dart
+│   └── nutrition_api_service.dart
+│
+├── utils/
+│   ├── snackbar_helper.dart
+│   ├── validators.dart
+│   └── constants.dart
+│
+├── widgets/
+│   ├── food_card.dart
+│   ├── nutrition_info.dart
+│   ├── app_scaffold.dart
+│   ├── bottom_navigation_shell.dart
+│   └── favorite_food_card.dart
+│
+└── main.dart
 
 ---
 
