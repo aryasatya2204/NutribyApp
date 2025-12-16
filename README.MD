@@ -12,15 +12,32 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 | 2 | Muhammad Alif Akbar Harahap | 231401127 | UIUX / Database |
 | 3 | Yazid Ilmi Ihsan | 231401037 | Frontend / System Analys |
 
-## ✨ Fitur Utama
+# ✨ Fitur Utama
 
-- **👤 Profil Anak Personal:** Mencatat data antropometri anak (berat, tinggi, usia) dan kondisi orang tua (pendapatan) untuk memberikan rekomendasi yang terpersonalisasi.
-- **🧠 Engine Status Gizi Cerdas:** Secara otomatis menghitung status gizi anak (HFA, WFA, WFH) berdasarkan standar WHO untuk mendeteksi risiko stunting, gizi kurang, atau gizi buruk.
-- **💰 Rekomendasi Budget Dinamis:** Memberikan rekomendasi rentang budget MPASI bulanan yang realistis, dihitung berdasarkan kebutuhan gizi anak dan kemampuan finansial keluarga.
-- **🍲 Generate MPASI Mingguan:** Fitur inti yang secara otomatis membuat rencana makan 21 menu untuk satu minggu penuh, disesuaikan dengan budget, usia, status gizi, alergi, dan makanan kesukaan anak.
-- **🔍 Pencarian Resep Fleksibel:** Memungkinkan pengguna mencari resep berdasarkan nama menu ataupun bahan makanan yang mereka miliki di rumah.
-- ** Fakta Alergi:** Menyediakan informasi mengenai alergi makanan, gejala, dan cara penanganannya.
+### 🔐 Autentikasi & Pengguna
 
+* **Login & Register:** Autentikasi aman menggunakan Email & Password via Firebase Auth
+* **Google Sign-In:** Login cepat satu ketukan menggunakan akun Google
+* **Manajemen Profil:** Pengguna dapat mengatur data diri (berat/tinggi badan), target kalori, dan logout dengan aman
+
+### 🍎 Pelacakan Nutrisi & Makanan
+
+* **Database Makanan:** Pencarian database makanan lengkap (Kalori, Protein, Karbo, Lemak)
+* **Pencarian Pintar:** Cari makanan atau minuman dengan fitur *debounce* untuk efisiensi API
+* **Barcode Scanner:** Pindai *barcode* kemasan makanan untuk mendapatkan informasi nilai gizi secara instan
+* **Daily Log:** Mencatat asupan sarapan, makan siang, makan malam, dan camilan harian
+
+### 📊 Analisis Kesehatan (Cloud Sync)
+
+* **Kalkulator BMI:** Menghitung Indeks Massa Tubuh secara otomatis berdasarkan profil pengguna
+* **Grafik Progress:** Visualisasi data asupan kalori mingguan untuk memantau target diet
+* **Sinkronisasi Real-time:** Riwayat makan disimpan di **Cloud Firestore**, sehingga data tetap aman meski berganti perangkat
+
+### 🎨 UI/UX Modern
+
+* **Responsive Design:** Tampilan antarmuka yang menyesuaikan ukuran layar (ponsel & tablet)
+* **Clean Dashboard:** Ringkasan nutrisi harian ditampilkan dengan visual yang mudah dipahami
+* **Optimasi Performa:** Menggunakan *lazy loading* pada daftar makanan untuk mempercepat navigasi
 ---
 
 ## 🛠️ Teknologi yang Digunakan (Tech Stack)
