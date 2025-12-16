@@ -166,6 +166,31 @@ Pastikan Anda memiliki Flutter SDK terinstal.
 
 ---
 
+## 🐛 Troubleshooting
+
+### ❌ Google Sign-In Error (Code 10 / DEVELOPER_ERROR)
+
+**Solusi:**
+
+* Pastikan SHA-1 sudah terdaftar di Firebase
+* Download ulang `google-services.json` dan timpa yang lama
+* Rebuild aplikasi: `flutter clean && flutter build apk --release`
+
+### ❌ Firebase Connection Failed
+
+**Solusi:**
+
+* Cek apakah `google-services.json` ada di `android/app/`
+* Pastikan package name di Firebase sama dengan di `build.gradle.kts`
+* Sinkronkan gradle: `cd android && ./gradlew --refresh-dependencies`
+
+### ❌ Keystore Error saat Build
+
+**Solusi:**
+
+* Periksa password di `key.properties` sudah benar
+* Pastikan path `storeFile` mengarah ke file `.jks` yang valid
+
 ## 📚 Dokumentasi API
 
 Dokumentasi API lengkap, termasuk contoh request dan response untuk setiap endpoint, tersedia melalui Postman. Silakan impor koleksi Postman yang tersedia atau kunjungi link publikasi berikut:
