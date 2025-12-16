@@ -34,8 +34,7 @@ class GrowthHistory {
       weight: parseDouble(json['weight']) ?? 0.0,
       height: parseDouble(json['height']) ?? 0.0,
       nutritionalStatusHfa: json['nutritional_status_hfa'] ?? '-',
-      
-      // Menangkap Z-Score dari backend
+
       zScoreHfa: parseDouble(json['z_score_hfa']),
       zScoreWfa: parseDouble(json['z_score_wfa']),
       zScoreWfh: parseDouble(json['z_score_wfh']),

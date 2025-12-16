@@ -8,7 +8,7 @@ class Ingredient {
     // Pastikan base URL ini sesuai dengan server Laravel Anda
     // (10.0.2.2:8000 untuk emulator Android, IP komputer Anda untuk device fisik)
     // return 'http://10.0.2.2:8000/storage/$imageUrl';
-    return 'http://192.168.1.5:8000/$imageUrl';
+    return 'https://nutribyapp.user.cloudjkt02.com/public/allergies/$imageUrl';
   }
 
   Ingredient({

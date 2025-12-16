@@ -40,7 +40,6 @@ class Child {
   });
 
   factory Child.fromJson(Map<String, dynamic> json) {
-    // Helper untuk parse Ingredient
     List<Ingredient> parseIngredients(String key) {
       if (json[key] != null && json[key] is List) {
         return (json[key] as List)
@@ -50,7 +49,6 @@ class Child {
       return [];
     }
 
-    // ✅ FIX: Helper khusus untuk parse Allergy
     List<Allergy> parseAllergies(String key) {
       if (json[key] != null && json[key] is List) {
         return (json[key] as List)
@@ -83,7 +81,7 @@ class Child {
       nutritionalStatusNotes: json['nutritional_status_notes'],
       budgetMin: json['budget_min'],
       budgetMax: json['budget_max'],
-      allergies: parseAllergies('allergies'), // ✅ Gunakan parser alergi
+      allergies: parseAllergies('allergies'),
       favoriteIngredients: parseIngredients('favorite_ingredients'),
       growthHistories: parseHistory('growth_histories'),
     );

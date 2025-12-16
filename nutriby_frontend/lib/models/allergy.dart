@@ -27,7 +27,7 @@ class Allergy {
         ? imageUrl!.substring(7) // Hapus 'public/'
         : imageUrl!;
 
-    return 'http://192.168.1.5:8000/$cleanPath';
+    return 'https://nutribyapp.user.cloudjkt02.com/storage/$cleanPath';
   }
 
   factory Allergy.fromJson(Map<String, dynamic> json) {

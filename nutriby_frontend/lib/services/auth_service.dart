@@ -7,7 +7,7 @@ import '../models/user_model.dart';
 
 class AuthService with ChangeNotifier {
   // final String _baseUrl = 'http://10.0.2.2:8000/api';
-  final String _baseUrl = 'http://192.168.1.5:8000/api';
+  final String _baseUrl = 'https://nutribyapp.user.cloudjkt02.com/api';
 
   bool _isLoading = false;
   User? _user;
