@@ -15,13 +15,25 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 
 ---
 
-## 🛠️ Tumpukan Teknologi (Tech Stack)
+## 🛠️ Teknologi yang Digunakan (Tech Stack)
 
-- **Backend:** Laravel 12 (PHP)
-- **Frontend:** Flutter 3 (Dart)
-- **Database:** MySQL
-- **Otentikasi API:** Laravel Sanctum
-- **Pengujian API:** Postman
+| Kategori               | Teknologi / Library    | Deskripsi                                                                         |
+| ---------------------- | ---------------------- | --------------------------------------------------------------------------------- |
+| **Backend Framework**  | Laravel 12 (PHP)       | Framework utama untuk membangun RESTful API yang scalable dan terstruktur         |
+| **Frontend Framework** | Flutter 3 (Dart)       | Framework cross-platform untuk membangun aplikasi mobile Android dan iOS          |
+| **State Management**   | Provider               | Mengelola state aplikasi Flutter secara efisien dan reaktif                       |
+| **API Architecture**   | REST API               | Arsitektur komunikasi antara frontend dan backend berbasis HTTP                   |
+| **Authentication**     | Laravel Sanctum        | Menyediakan autentikasi API berbasis token yang aman                              |
+| **Database**           | MySQL                  | Sistem manajemen basis data relasional untuk menyimpan data pengguna dan aplikasi |
+| **ORM**                | Eloquent ORM           | Mempermudah interaksi database dengan pendekatan object-relational mapping        |
+| **Network Client**     | HTTP Package (Flutter) | Melakukan request API (GET, POST, PUT, DELETE) dari aplikasi mobile               |
+| **API Testing**        | Postman                | Pengujian endpoint API untuk memastikan fungsionalitas dan validasi data          |
+| **Data Format**        | JSON                   | Format pertukaran data antara backend Laravel dan frontend Flutter                |
+| **Version Control**    | Git & GitHub           | Mengelola versi kode sumber dan kolaborasi pengembangan                           |
+| **Security**           | CSRF & Middleware      | Perlindungan endpoint API dan validasi request                                    |
+| **UI Components**      | Material UI (Flutter)  | Komponen antarmuka berbasis Material Design                                       |
+| **Development Tools**  | VS Code                | Code editor utama untuk pengembangan backend dan frontend                         |
+
 
 ---
 
