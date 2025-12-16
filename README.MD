@@ -4,6 +4,14 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 
 ---
 
+## 👥 Anggota Kelompok
+
+| No | Nama | NIM | Peran |
+|----|------|-----|-------|
+| 1 | Muhammad Aryasatya | 231401094 | Project Manager / Backend |
+| 2 | Muhammad Alif Akbar Harahap | 231401127 | UIUX / Database |
+| 3 | Yazid Ilmi Ihsan | 231401037 | Frontend / System Analys |
+
 ## ✨ Fitur Utama
 
 - **👤 Profil Anak Personal:** Mencatat data antropometri anak (berat, tinggi, usia) dan kondisi orang tua (pendapatan) untuk memberikan rekomendasi yang terpersonalisasi.
@@ -15,14 +23,75 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 
 ---
 
-## 🛠️ Tumpukan Teknologi (Tech Stack)
+## 🛠️ Teknologi yang Digunakan (Tech Stack)
 
-- **Backend:** Laravel 12 (PHP)
-- **Frontend:** Flutter 3 (Dart)
-- **Database:** MySQL
-- **Otentikasi API:** Laravel Sanctum
-- **Pengujian API:** Postman
+| Kategori               | Teknologi / Library    | Deskripsi                                                                         |
+| ---------------------- | ---------------------- | --------------------------------------------------------------------------------- |
+| **Backend Framework**  | Laravel 12 (PHP)       | Framework utama untuk membangun RESTful API yang scalable dan terstruktur         |
+| **Frontend Framework** | Flutter 3 (Dart)       | Framework cross-platform untuk membangun aplikasi mobile Android dan iOS          |
+| **State Management**   | Provider               | Mengelola state aplikasi Flutter secara efisien dan reaktif                       |
+| **API Architecture**   | REST API               | Arsitektur komunikasi antara frontend dan backend berbasis HTTP                   |
+| **Authentication**     | Laravel Sanctum        | Menyediakan autentikasi API berbasis token yang aman                              |
+| **Database**           | MySQL                  | Sistem manajemen basis data relasional untuk menyimpan data pengguna dan aplikasi |
+| **ORM**                | Eloquent ORM           | Mempermudah interaksi database dengan pendekatan object-relational mapping        |
+| **Network Client**     | HTTP Package (Flutter) | Melakukan request API (GET, POST, PUT, DELETE) dari aplikasi mobile               |
+| **API Testing**        | Postman                | Pengujian endpoint API untuk memastikan fungsionalitas dan validasi data          |
+| **Data Format**        | JSON                   | Format pertukaran data antara backend Laravel dan frontend Flutter                |
+| **Version Control**    | Git & GitHub           | Mengelola versi kode sumber dan kolaborasi pengembangan                           |
+| **Security**           | CSRF & Middleware      | Perlindungan endpoint API dan validasi request                                    |
+| **UI Components**      | Material UI (Flutter)  | Komponen antarmuka berbasis Material Design                                       |
+| **Development Tools**  | VS Code                | Code editor utama untuk pengembangan backend dan frontend                         |
 
+## 📁 Struktur Project
+
+```bash
+lib/
+├── config/
+│   └── routes.dart
+│
+├── models/
+│   ├── food.dart
+│   ├── nutrition.dart
+│   └── user_profile.dart
+│
+├── providers/
+│   ├── app_state_provider.dart
+│   ├── auth_provider.dart
+│   └── nutrition_provider.dart
+│
+├── repositories/
+│   ├── food_repository.dart
+│   └── user_repository.dart
+│
+├── screens/
+│   ├── home_screen.dart
+│   ├── food_detail_screen.dart
+│   ├── tracker_screen.dart
+│   ├── favorite_screen.dart
+│   ├── profile_screen.dart
+│   ├── signin_screen.dart
+│   └── signup_screen.dart
+│
+├── services/
+│   ├── auth/
+│   │   └── firebase_auth_service.dart
+│   ├── firestore_service.dart
+│   └── nutrition_api_service.dart
+│
+├── utils/
+│   ├── snackbar_helper.dart
+│   ├── validators.dart
+│   └── constants.dart
+│
+├── widgets/
+│   ├── food_card.dart
+│   ├── nutrition_info.dart
+│   ├── app_scaffold.dart
+│   ├── bottom_navigation_shell.dart
+│   └── favorite_food_card.dart
+│
+└── main.dart
+```
 ---
 
 ## 🚀 Panduan Instalasi & Setup
