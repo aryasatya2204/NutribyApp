@@ -195,7 +195,16 @@ Pastikan Anda memiliki Flutter SDK terinstal.
 
 Dokumentasi API lengkap, termasuk contoh request dan response untuk setiap endpoint, tersedia melalui Postman. Silakan impor koleksi Postman yang tersedia atau kunjungi link publikasi berikut:
 
-**[Link ke Dokumantasi API akan di letak disini (soon)]**
+🔗 **[Link ke Dokumentasi API akan diletakkan di sini (soon)](#)**
+
+---
+
+### 🌐 API Eksternal yang Digunakan
+Aplikasi ini juga berinteraksi dengan layanan pihak ketiga berikut:
+
+* **Firebase Auth:** Untuk manajemen autentikasi pengguna.
+* **Firestore Database:** Untuk sinkronisasi data nutrisi dan profil secara *real-time*.
+* **(Opsional) Food Database API:** Sumber data nutrisi makanan/minuman.
 
 ---
 
