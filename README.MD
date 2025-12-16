@@ -4,6 +4,14 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 
 ---
 
+## 👥 Anggota Kelompok
+
+| No | Nama | NIM | Peran |
+|----|------|-----|-------|
+| 1 | Muhammad Aryasatya | 231401094 | Project Manager / Backend |
+| 2 | Muhammad Alif Akbar Harahap | 231401127 | UIUX / Database |
+| 3 | Yazid Ilmi Ihsan | 231401037 | Frontend / System Analys |
+
 ## ✨ Fitur Utama
 
 - **👤 Profil Anak Personal:** Mencatat data antropometri anak (berat, tinggi, usia) dan kondisi orang tua (pendapatan) untuk memberikan rekomendasi yang terpersonalisasi.
@@ -83,7 +91,7 @@ lib/
 │   └── favorite_food_card.dart
 │
 └── main.dart
-
+```
 ---
 
 ## 🚀 Panduan Instalasi & Setup
