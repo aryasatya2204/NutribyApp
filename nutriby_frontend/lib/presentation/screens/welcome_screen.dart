@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/presentation/screens/login_screen.dart';
-import 'package:nutriby_frontend/presentation/screens/register_screen.dart';
+import 'package:nutriby/presentation/screens/login_screen.dart';
+import 'package:nutriby/presentation/screens/register_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

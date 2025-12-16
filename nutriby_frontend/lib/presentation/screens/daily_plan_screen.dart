@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:nutriby_frontend/models/weekly_plan.dart';
-import 'package:nutriby_frontend/presentation/screens/recipe_detail_screen.dart';
+import 'package:nutriby/models/weekly_plan.dart';
+import 'package:nutriby/presentation/screens/recipe_detail_screen.dart';
 
 class DailyPlanScreen extends StatelessWidget {
   final String dayName;

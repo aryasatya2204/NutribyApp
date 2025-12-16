@@ -1,4 +1,4 @@
-import 'package:nutriby_frontend/models/ingredient_pivot.dart';
+import 'package:nutriby/models/ingredient_pivot.dart';
 
 class Recipe {
   final int id;

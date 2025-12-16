@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:nutriby_frontend/models/child.dart';
-import 'package:nutriby_frontend/models/ingredient.dart';
-import 'package:nutriby_frontend/models/allergy.dart';
-import 'package:nutriby_frontend/models/user_model.dart';
-import 'package:nutriby_frontend/services/auth_service.dart';
-import 'package:nutriby_frontend/services/child_service.dart';
-import 'package:nutriby_frontend/services/data_service.dart';
-import 'package:nutriby_frontend/utils/currency_input_formatter.dart';
+import 'package:nutriby/models/child.dart';
+import 'package:nutriby/models/ingredient.dart';
+import 'package:nutriby/models/allergy.dart';
+import 'package:nutriby/models/user_model.dart';
+import 'package:nutriby/services/auth_service.dart';
+import 'package:nutriby/services/child_service.dart';
+import 'package:nutriby/services/data_service.dart';
+import 'package:nutriby/utils/currency_input_formatter.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {

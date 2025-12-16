@@ -1,7 +1,6 @@
-// lib/services/child_service.dart (FIXED)
 import 'dart:convert';
-import 'package:nutriby_frontend/models/child.dart';
-import 'package:nutriby_frontend/services/api_service.dart';
+import 'package:nutriby/models/child.dart';
+import 'package:nutriby/services/api_service.dart';
 
 class ChildService {
   final ApiService _api = ApiService();

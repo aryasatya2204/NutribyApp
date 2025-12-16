@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:nutriby_frontend/models/recipe.dart';
-import 'package:nutriby_frontend/services/api_service.dart';
+import 'package:nutriby/models/recipe.dart';
+import 'package:nutriby/services/api_service.dart';
 
 class RecipeService {
   final ApiService _api = ApiService();

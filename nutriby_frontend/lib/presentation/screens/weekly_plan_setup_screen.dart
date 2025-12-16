@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:nutriby_frontend/models/child.dart';
-import 'package:nutriby_frontend/models/ingredient.dart';
-import 'package:nutriby_frontend/models/allergy.dart';
-import 'package:nutriby_frontend/models/weekly_plan.dart';
-import 'package:nutriby_frontend/presentation/screens/weekly_plan_display_screen.dart';
-import 'package:nutriby_frontend/presentation/screens/widgets/loading_dialog.dart';
-import 'package:nutriby_frontend/services/child_service.dart';
-import 'package:nutriby_frontend/services/data_service.dart';
-import 'package:nutriby_frontend/services/weekly_plan_service.dart';
-import 'package:nutriby_frontend/utils/currency_input_formatter.dart';
+import 'package:nutriby/models/child.dart';
+import 'package:nutriby/models/ingredient.dart';
+import 'package:nutriby/models/allergy.dart';
+import 'package:nutriby/models/weekly_plan.dart';
+import 'package:nutriby/presentation/screens/weekly_plan_display_screen.dart';
+import 'package:nutriby/presentation/screens/widgets/loading_dialog.dart';
+import 'package:nutriby/services/child_service.dart';
+import 'package:nutriby/services/data_service.dart';
+import 'package:nutriby/services/weekly_plan_service.dart';
+import 'package:nutriby/utils/currency_input_formatter.dart';
 
 import '../../services/data_service.dart';
 

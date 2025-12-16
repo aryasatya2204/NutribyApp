@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/models/weekly_plan.dart';
-import 'package:nutriby_frontend/presentation/screens/weekly_plan_display_screen.dart';
-import 'package:nutriby_frontend/presentation/screens/weekly_plan_setup_screen.dart';
-import 'package:nutriby_frontend/services/child_service.dart';
-import 'package:nutriby_frontend/services/weekly_plan_service.dart';
+import 'package:nutriby/models/weekly_plan.dart';
+import 'package:nutriby/presentation/screens/weekly_plan_display_screen.dart';
+import 'package:nutriby/presentation/screens/weekly_plan_setup_screen.dart';
+import 'package:nutriby/services/child_service.dart';
+import 'package:nutriby/services/weekly_plan_service.dart';
 
 /// Screen entry point untuk Weekly Plan
 /// Cek apakah ada plan aktif, jika ada tampilkan, jika tidak redirect ke setup

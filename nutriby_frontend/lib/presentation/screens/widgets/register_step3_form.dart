@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:nutriby_frontend/models/allergy.dart';
-import 'package:nutriby_frontend/models/ingredient.dart';
-import 'package:nutriby_frontend/services/auth_service.dart';
-import 'package:nutriby_frontend/services/data_service.dart';
+import 'package:nutriby/models/allergy.dart';
+import 'package:nutriby/models/ingredient.dart';
+import 'package:nutriby/services/auth_service.dart';
+import 'package:nutriby/services/data_service.dart';
 import 'package:provider/provider.dart';
 
 class RegisterStep3Form extends StatefulWidget {

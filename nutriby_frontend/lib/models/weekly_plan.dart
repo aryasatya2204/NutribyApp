@@ -1,4 +1,4 @@
-import 'package:nutriby_frontend/models/recipe.dart';
+import 'package:nutriby/models/recipe.dart';
 
 class WeeklyPlan {
   final int id;

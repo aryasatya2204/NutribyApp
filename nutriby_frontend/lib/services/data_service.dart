@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:nutriby_frontend/models/ingredient.dart';
-import 'package:nutriby_frontend/models/allergy.dart';
-import 'package:nutriby_frontend/services/api_service.dart';
+import 'package:nutriby/models/ingredient.dart';
+import 'package:nutriby/models/allergy.dart';
+import 'package:nutriby/services/api_service.dart';
 
 class DataService {
   final ApiService _api = ApiService();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:nutriby_frontend/models/child.dart';
-import 'package:nutriby_frontend/presentation/screens/home_screen.dart';
+import 'package:nutriby/models/child.dart';
+import 'package:nutriby/presentation/screens/home_screen.dart';
 
 class RegistrationSummaryScreen extends StatelessWidget {
   final Child child;

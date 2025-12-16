@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart';
-import 'package:nutriby_frontend/models/weekly_plan.dart';
-import 'package:nutriby_frontend/services/api_service.dart';
+import 'package:nutriby/models/weekly_plan.dart';
+import 'package:nutriby/services/api_service.dart';
 
 class WeeklyPlanService {
   final ApiService _api = ApiService();

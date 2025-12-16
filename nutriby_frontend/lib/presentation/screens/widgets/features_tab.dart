@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/presentation/screens/allergy_facts_screen.dart';
+import 'package:nutriby/presentation/screens/allergy_facts_screen.dart';
 
 import '../daily_menu_setup_screen.dart';
 import '../weekly_plan_entry_screen.dart';
@@ -96,7 +96,8 @@ class FeaturesTab extends StatelessWidget {
           image: DecorationImage(
             image: AssetImage(imagePlaceholder),
             fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.45), BlendMode.darken),
+            colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.45), BlendMode.darken),
           ),
           boxShadow: [
             BoxShadow(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:nutriby_frontend/models/weekly_plan.dart';
-import 'package:nutriby_frontend/presentation/screens/daily_plan_screen.dart';
+import 'package:nutriby/models/weekly_plan.dart';
+import 'package:nutriby/presentation/screens/daily_plan_screen.dart';
 
 class WeeklyPlanDisplayScreen extends StatefulWidget {
   final WeeklyPlan weeklyPlan;

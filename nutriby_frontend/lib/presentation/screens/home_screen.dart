@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/presentation/screens/profile_screen.dart';
-import 'package:nutriby_frontend/presentation/screens/widgets/features_tab.dart';
-import 'package:nutriby_frontend/presentation/screens/widgets/information_tab.dart';
+import 'package:nutriby/presentation/screens/profile_screen.dart';
+import 'package:nutriby/presentation/screens/widgets/features_tab.dart';
+import 'package:nutriby/presentation/screens/widgets/information_tab.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

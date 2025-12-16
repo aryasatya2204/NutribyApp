@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/data/malnutrition_data.dart';
-import 'package:nutriby_frontend/models/child.dart';
-import 'package:nutriby_frontend/services/child_service.dart';
+import 'package:nutriby/data/malnutrition_data.dart';
+import 'package:nutriby/models/child.dart';
+import 'package:nutriby/services/child_service.dart';
 
 class InformationTab extends StatefulWidget {
   const InformationTab({super.key});

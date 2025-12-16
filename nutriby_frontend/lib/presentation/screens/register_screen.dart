@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/models/child.dart';
-import 'package:nutriby_frontend/presentation/screens/registration_summary_screen.dart';
-import 'package:nutriby_frontend/presentation/screens/widgets/loading_dialog.dart';
-import 'package:nutriby_frontend/presentation/screens/widgets/register_step1_form.dart';
-import 'package:nutriby_frontend/presentation/screens/widgets/register_step2_form.dart';
-import 'package:nutriby_frontend/presentation/screens/widgets/register_step3_form.dart';
-import 'package:nutriby_frontend/services/auth_service.dart';
-import 'package:nutriby_frontend/services/child_service.dart';
+import 'package:nutriby/models/child.dart';
+import 'package:nutriby/presentation/screens/registration_summary_screen.dart';
+import 'package:nutriby/presentation/screens/widgets/loading_dialog.dart';
+import 'package:nutriby/presentation/screens/widgets/register_step1_form.dart';
+import 'package:nutriby/presentation/screens/widgets/register_step2_form.dart';
+import 'package:nutriby/presentation/screens/widgets/register_step3_form.dart';
+import 'package:nutriby/services/auth_service.dart';
+import 'package:nutriby/services/child_service.dart';
 import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {

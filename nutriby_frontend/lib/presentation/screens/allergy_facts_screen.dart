@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/models/allergy.dart';
-import 'package:nutriby_frontend/models/ingredient.dart';
-import 'package:nutriby_frontend/presentation/screens/allergy_detail_screen.dart';
-import 'package:nutriby_frontend/services/data_service.dart';
+import 'package:nutriby/models/allergy.dart';
+import 'package:nutriby/models/ingredient.dart';
+import 'package:nutriby/presentation/screens/allergy_detail_screen.dart';
+import 'package:nutriby/services/data_service.dart';
 
 class AllergyFactsScreen extends StatefulWidget {
   const AllergyFactsScreen({super.key});

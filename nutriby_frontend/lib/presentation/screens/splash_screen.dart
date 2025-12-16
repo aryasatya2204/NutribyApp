@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/presentation/screens/welcome_screen.dart';
+import 'package:nutriby/presentation/screens/welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

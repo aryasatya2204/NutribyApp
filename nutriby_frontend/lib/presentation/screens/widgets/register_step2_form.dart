@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:nutriby_frontend/utils/currency_input_formatter.dart';
+import 'package:nutriby/utils/currency_input_formatter.dart';
 
 class RegisterStep2Form extends StatefulWidget {
   final GlobalKey<FormState> formKey;

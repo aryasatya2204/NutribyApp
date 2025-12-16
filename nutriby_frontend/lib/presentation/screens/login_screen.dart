@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/presentation/screens/home_screen.dart';
-import 'package:nutriby_frontend/presentation/screens/register_screen.dart';
-import 'package:nutriby_frontend/services/auth_service.dart';
+import 'package:nutriby/presentation/screens/home_screen.dart';
+import 'package:nutriby/presentation/screens/register_screen.dart';
+import 'package:nutriby/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
 

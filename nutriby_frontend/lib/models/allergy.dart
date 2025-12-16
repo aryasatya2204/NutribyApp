@@ -1,4 +1,4 @@
-import 'package:nutriby_frontend/models/ingredient.dart';
+import 'package:nutriby/models/ingredient.dart';
 
 class Allergy {
   final int id;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:nutriby_frontend/models/recipe.dart';
+import 'package:nutriby/models/recipe.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
   final Recipe recipe;

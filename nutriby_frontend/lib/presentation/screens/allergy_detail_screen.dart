@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nutriby_frontend/models/allergy.dart';
-import 'package:nutriby_frontend/models/ingredient.dart';
+import 'package:nutriby/models/allergy.dart';
+import 'package:nutriby/models/ingredient.dart';
 
 class AllergyDetailScreen extends StatelessWidget {
   final Allergy allergy;
@@ -17,8 +17,7 @@ class AllergyDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xFFC70039);
-
-    // Perbaikan: Gunakan fullImageUrl untuk mendapatkan URL lengkap
+    
     final String? displayImageUrl = allergy.fullImageUrl ??
         (allergy.ingredients.isNotEmpty ? allergy.ingredients.first.fullImageUrl : null);
 

@@ -4,16 +4,16 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nutriby_frontend/models/child.dart';
-import 'package:nutriby_frontend/models/ingredient.dart';
-import 'package:nutriby_frontend/models/allergy.dart';
-import 'package:nutriby_frontend/models/recipe.dart';
-import 'package:nutriby_frontend/presentation/screens/daily_menu_results_screen.dart'; // Halaman hasil
-import 'package:nutriby_frontend/presentation/screens/widgets/loading_dialog.dart';
-import 'package:nutriby_frontend/services/child_service.dart';
-import 'package:nutriby_frontend/services/data_service.dart';
-import 'package:nutriby_frontend/services/recipe_service.dart'; // Service resep baru
-import 'package:nutriby_frontend/utils/currency_input_formatter.dart';
+import 'package:nutriby/models/child.dart';
+import 'package:nutriby/models/ingredient.dart';
+import 'package:nutriby/models/allergy.dart';
+import 'package:nutriby/models/recipe.dart';
+import 'package:nutriby/presentation/screens/daily_menu_results_screen.dart'; // Halaman hasil
+import 'package:nutriby/presentation/screens/widgets/loading_dialog.dart';
+import 'package:nutriby/services/child_service.dart';
+import 'package:nutriby/services/data_service.dart';
+import 'package:nutriby/services/recipe_service.dart'; // Service resep baru
+import 'package:nutriby/utils/currency_input_formatter.dart';
 
 class DailyMenuSetupScreen extends StatefulWidget {
   const DailyMenuSetupScreen({super.key});

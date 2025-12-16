@@ -1,6 +1,6 @@
-import 'package:nutriby_frontend/models/ingredient.dart';
-import 'package:nutriby_frontend/models/growth_history.dart';
-import 'package:nutriby_frontend/models/allergy.dart'; // Pastikan import ini ada
+import 'package:nutriby/models/ingredient.dart';
+import 'package:nutriby/models/growth_history.dart';
+import 'package:nutriby/models/allergy.dart'; // Pastikan import ini ada
 
 class Child {
   final int id;
