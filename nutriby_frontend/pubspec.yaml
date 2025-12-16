@@ -1,64 +1,56 @@
 name: nutriby_frontend
 description: "A smart solution to prevent stunting."
-# Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.0 <4.0.0' # Sesuaikan dengan versi Dart SDK Anda
+  sdk: '>=3.2.0 <4.0.0'
 
 #====================================================================
-# DEPENDENCIES - "Perkakas" untuk Aplikasi Anda
+# DEPENDENCIES
 #====================================================================
 dependencies:
   flutter:
     sdk: flutter
 
-  # 1. Untuk Komunikasi dengan Backend (API Laravel)
-  # Paket standar dan kuat untuk membuat permintaan HTTP GET, POST, dll.
   http: ^1.2.1
   flutter_secure_storage: ^9.1.1
   intl: ^0.19.0
 
-  # 2. Untuk Manajemen State (Mengelola Data di Seluruh Aplikasi)
-  # Cara yang direkomendasikan dan mudah untuk mengelola state seperti
-  # status login pengguna, data anak, dll., agar bisa diakses di halaman mana pun.
   provider: ^6.1.2
-
-  # 3. Untuk Penyimpanan Lokal Sederhana
-  # Sangat penting untuk menyimpan data kecil secara permanen,
-  # seperti token otentikasi pengguna setelah mereka login.
   shared_preferences: ^2.2.3
-
-  # 4. Untuk Menampilkan Gambar dari Jaringan dengan Caching
-  # Berguna untuk menampilkan gambar resep dari URL yang diberikan oleh backend.
-  # Caching akan membuat gambar dimuat lebih cepat saat dibuka kembali.
   cached_network_image: ^3.3.1
-
-  # Ikon tambahan jika dibutuhkan
   cupertino_icons: ^1.0.2
 
+#====================================================================
+# DEV DEPENDENCIES
+#====================================================================
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
 
 #====================================================================
-# FLUTTER - Konfigurasi Spesifik untuk Proyek Flutter
+# APP ICON CONFIG (JANGAN TARUH DI DALAM flutter:)
+#====================================================================
+flutter_icons:
+  android: true
+  ios: false
+  image_path: "assets/logo/logo_NutriBy.png"
+
+#====================================================================
+# FLUTTER
 #====================================================================
 flutter:
   uses-material-design: true
 
-  # --- Aset Aplikasi ---
-  # Deklarasikan folder di mana Anda akan menyimpan gambar lokal atau file lainnya.
   assets:
     - assets/fonts/
     - assets/images/
 
-  # --- Font Kustom ---
-  # Deklarasi untuk fonts Inter yang sudah kita bahas.
   fonts:
     - family: Inter
       fonts:
