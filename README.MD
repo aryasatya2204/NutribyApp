@@ -34,7 +34,9 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 | **UI Components**      | Material UI (Flutter)  | Komponen antarmuka berbasis Material Design                                       |
 | **Development Tools**  | VS Code                | Code editor utama untuk pengembangan backend dan frontend                         |
 
-📁 struktur project
+## 📁 Struktur Project
+
+```bash
 lib/
 ├── config/
 │   └── routes.dart
@@ -54,7 +56,7 @@ lib/
 │   ├── auth_provider.dart
 │   │   # Logic autentikasi user & sinkronisasi UI
 │   └── nutrition_provider.dart
-│       # Logic perhitungan & manajemen data nutrisi
+│       # Logic perhitungan & manajemen nutrisi
 │
 ├── repositories/
 │   ├── food_repository.dart
@@ -71,44 +73,7 @@ lib/
 │   │   # Halaman tracking konsumsi harian
 │   ├── favorite_screen.dart
 │   │   # Daftar makanan favorit
-│   ├── profile_screen.dart
-│   │   # Profil user & pengaturan
-│   ├── signin_screen.dart
-│   │   # Halaman login
-│   └── signup_screen.dart
-│       # Halaman registrasi
-│
-├── services/
-│   ├── auth/
-│   │   └── firebase_auth_service.dart
-│   │       # Service autentikasi Firebase
-│   ├── firestore_service.dart
-│   │   # Service Cloud Firestore
-│   └── nutrition_api_service.dart
-│       # Service API data nutrisi
-│
-├── utils/
-│   ├── snackbar_helper.dart
-│   │   # Helper global notifikasi (SnackBar)
-│   ├── validators.dart
-│   │   # Validasi input form (email, password, angka)
-│   └── constants.dart
-│       # Konstanta global (warna, teks, enum)
-│
-├── widgets/
-│   ├── food_card.dart
-│   │   # Widget kartu makanan
-│   ├── nutrition_info.dart
-│   │   # Widget ringkasan informasi gizi
-│   ├── app_scaffold.dart
-│   │   # Scaffold dasar dengan background & layout global
-│   ├── bottom_navigation_shell.dart
-│   │   # Bottom navigation bar (persistent)
-│   └── favorite_food_card.dart
-│       # Widget kartu makanan favorit
-│
-└── main.dart
-    # Entry point aplikasi
+│   ├── profile_screen._
 
 ---
 
