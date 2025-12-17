@@ -59,8 +59,8 @@ NutriBy adalah aplikasi mobile komprehensif yang dirancang untuk membantu orang 
 | **UI Components**      | Material UI (Flutter)  | Komponen antarmuka berbasis Material Design                                       |
 | **Development Tools**  | VS Code                | Code editor utama untuk pengembangan backend dan frontend                         |
 
-## 📁 Struktur Project
-
+## 📁 SRS
+https://drive.google.com/file/d/1bNnQVCEeOHcPWaHbqv3No-H0t3C4O1vd/view?usp=sharing
 ## 📂 Struktur Project
 
 Berikut adalah struktur direktori lengkap (Monorepo) yang menggabungkan Backend dan Frontend:
@@ -103,6 +103,8 @@ Berikut adalah struktur direktori lengkap (Monorepo) yang menggabungkan Backend 
 │
 ├── .gitignore                  # Git ignore rules
 └── README.md                   # Dokumentasi ini
+
+```
 ---
 
 ## 🚀 Panduan Instalasi & Setup
