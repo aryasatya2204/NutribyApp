@@ -22,12 +22,13 @@ class Allergy {
   String? get fullImageUrl {
     if (imageUrl == null || imageUrl!.isEmpty) return null;
 
-    // Hapus prefix 'public/' jika ada dari database
-    String cleanPath = imageUrl!.startsWith('public/')
-        ? imageUrl!.substring(7) // Hapus 'public/'
-        : imageUrl!;
+    String cleanPath = imageUrl!.replaceAll('public/', '');
 
-    return 'https://nutribyapp.user.cloudjkt02.com/storage/$cleanPath';
+    if (!cleanPath.startsWith('allergies/')) {
+      cleanPath = 'allergies/$cleanPath';
+    }
+
+    return 'https://nutribyapp.user.cloudjkt02.com/$cleanPath';
   }
 
   factory Allergy.fromJson(Map<String, dynamic> json) {
